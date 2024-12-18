@@ -11,12 +11,12 @@ object ToolMapper {
         description = tool.description,
         createdBy = tool.createdBy,
         createdAt = tool.createdAt,
-        media = tool.media.map { mediaInfo ->
+        /*media = tool.media.map { mediaInfo ->
             MediaInfoResponse(
                 id = mediaInfo.id,
                 url = mediaInfo.url,
                 type = mediaInfo.type
             )
-        }
+        }*/
     )
 }

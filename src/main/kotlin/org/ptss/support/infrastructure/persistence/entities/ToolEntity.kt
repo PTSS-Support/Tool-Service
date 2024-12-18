@@ -7,51 +7,18 @@ import org.ptss.support.domain.models.Tool
 import java.time.Instant
 
 data class ToolEntity(
-    var name: String = "",
-    var description: String = "",
-    var media: String = "",
-    var createdBy: String = "",
-    var createdAt: Instant = Instant.now()
+    val id: String,
+    val name: String,
+    val description: String,
+    val createdBy: String,
+    val createdAt: Instant
 ) {
-    fun toTableEntity(tool: Tool): TableEntity {
-        return TableEntity("TOOL", tool.id).apply {
-            properties.apply {
-                put("name", name)
-                put("description", description)
-                put("media", media)
-                put("createdBy", createdBy)
-                put("createdAt", createdAt.toString())
-            }
-        }
-    }
-
-    companion object {
-        fun fromTableEntity(entity: TableEntity): ToolEntity {
-            return ToolEntity(
-                name = entity.properties["name"] as? String ?: "",
-                description = entity.properties["description"] as? String ?: "",
-                media = entity.properties["media"] as? String ?: "",
-                createdBy = entity.properties["createdBy"] as? String ?: "",
-                createdAt = entity.properties["createdAt"]?.let { Instant.parse(it.toString()) } ?: Instant.now()
-            )
-        }
-    }
-
-    fun toDomain(id: String): Tool {
+    fun toDomain(): Tool {
         return Tool(
             id = id,
             name = name,
             description = description,
-            media = media.split(",")
-                .filter { it.isNotEmpty() }
-                .map { mediaStr ->
-                    val parts = mediaStr.split("|")
-                    MediaInfo(
-                        id = parts.getOrNull(0) ?: "",
-                        url = parts.getOrNull(1) ?: "",
-                        type = parts.getOrNull(2)?.let { MediaType.valueOf(it) } ?: MediaType.IMAGE
-                    )
-                },
+            //media = emptyList(), // Media handling removed for now
             createdBy = createdBy,
             createdAt = createdAt
         )

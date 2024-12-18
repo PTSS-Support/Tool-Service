@@ -8,5 +8,5 @@ data class ToolResponse(
     val description: String,
     val createdBy: String,
     val createdAt: Instant,
-    val media: List<MediaInfoResponse>
+    //val media: List<MediaInfoResponse>
 )

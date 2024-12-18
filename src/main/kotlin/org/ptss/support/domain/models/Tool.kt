@@ -7,7 +7,7 @@ data class Tool(
     val id: String = UUID.randomUUID().toString(),
     val name: String,
     val description: String,
-    val media: List<MediaInfo> = emptyList(),
+    //val media: List<MediaInfo> = emptyList(),
     val createdBy: String,
     val createdAt: Instant
 )

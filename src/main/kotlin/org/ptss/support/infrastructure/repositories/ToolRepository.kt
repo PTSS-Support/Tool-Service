@@ -11,41 +11,42 @@ import org.ptss.support.domain.interfaces.repositories.IToolRepository
 import org.ptss.support.domain.models.MediaInfo
 import org.ptss.support.domain.models.Tool
 import org.ptss.support.infrastructure.config.AzureStorageConfig
+import org.ptss.support.infrastructure.config.PostgreSQLConfig
 import org.ptss.support.infrastructure.persistence.entities.ToolEntity
 import org.slf4j.LoggerFactory
+import java.sql.Connection
+import java.sql.DriverManager
 import java.time.Instant
 
 @ApplicationScoped
 class ToolRepository(
-    private val azureConfig: AzureStorageConfig
+    private val config: PostgreSQLConfig
 ) : IToolRepository {
+
     private val logger = LoggerFactory.getLogger(ToolRepository::class.java)
-    private lateinit var tableClient: TableClient
 
-    @PostConstruct
-    fun initialize() {
-        try {
-            val tableServiceClient = TableServiceClientBuilder()
-                .connectionString(azureConfig.connectionString())
-                .buildClient()
-
-            tableServiceClient.createTableIfNotExists(azureConfig.tableName())
-            tableClient = tableServiceClient.getTableClient(azureConfig.tableName())
-        } catch (e: Exception) {
-            logger.error("Failed to initialize Azure Table Storage", e)
-            throw APIException(
-                errorCode = ErrorCode.SERVICE_UNAVAILABLE,
-                message = "Failed to initialize storage service",
-            )
-        }
+    private val connection: Connection by lazy {
+        DriverManager.getConnection(config.url(), config.username(), config.password())
     }
 
     override fun getAll(): List<Tool> {
-        return tableClient.listEntities()
-            .map { entity ->
-                val toolEntity = ToolEntity.fromTableEntity(entity)
-                toolEntity.toDomain(entity.rowKey)
+        val tools = mutableListOf<ToolEntity>()
+        val query = "SELECT id, name, description, created_by, created_at FROM tools"
+
+        connection.prepareStatement(query).use { statement ->
+            val resultSet = statement.executeQuery()
+            while (resultSet.next()) {
+                tools.add(
+                    ToolEntity(
+                        id = resultSet.getString("id"),
+                        name = resultSet.getString("name"),
+                        description = resultSet.getString("description"),
+                        createdBy = resultSet.getString("created_by"),
+                        createdAt = resultSet.getTimestamp("created_at").toInstant()
+                    )
+                )
             }
-            .toList()
+        }
+        return tools.map { it.toDomain() }
     }
 }
