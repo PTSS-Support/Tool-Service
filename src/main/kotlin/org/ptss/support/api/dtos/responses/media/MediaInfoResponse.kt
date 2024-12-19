@@ -1,4 +1,4 @@
-package org.ptss.support.api.dtos.responses
+package org.ptss.support.api.dtos.responses.media
 
 import org.ptss.support.domain.enums.MediaType
 

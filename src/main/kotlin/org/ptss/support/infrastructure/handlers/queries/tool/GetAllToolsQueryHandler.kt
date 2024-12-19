@@ -4,7 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped
 import org.ptss.support.domain.interfaces.queries.IQueryHandler
 import org.ptss.support.domain.interfaces.repositories.IToolRepository
 import org.ptss.support.domain.models.Tool
-import org.ptss.support.domain.queries.GetAllToolsQuery
+import org.ptss.support.domain.queries.tool.GetAllToolsQuery
 
 @ApplicationScoped
 class GetAllToolsQueryHandler (
