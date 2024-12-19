@@ -75,6 +75,12 @@ class ToolService(
     suspend fun deleteToolAsync(toolId: String) {
         logger.executeWithExceptionLoggingAsync(
             operation = {
+                getToolByIdAsync(toolId)
+                    ?: throw APIException(
+                        errorCode = ErrorCode.TOOL_NOT_FOUND,
+                        message = "Tool with ID $toolId not found"
+                    )
+                
                 deleteToolHandler.handleAsync(DeleteToolCommand(toolId))
             },
             logMessage = "Error deleting tool $toolId",
