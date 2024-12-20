@@ -12,8 +12,8 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse
-import org.ptss.support.api.dtos.requests.tool.CreateToolRequest
-import org.ptss.support.api.dtos.responses.tool.ToolResponse
+import org.ptss.support.api.dtos.requests.tools.CreateToolRequest
+import org.ptss.support.api.dtos.responses.tools.ToolResponse
 import org.ptss.support.common.exceptions.ServiceError
 
 interface IToolController {

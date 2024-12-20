@@ -10,7 +10,7 @@ import org.ptss.support.domain.interfaces.queries.IQueryHandler
 import org.ptss.support.domain.models.Tool
 import org.ptss.support.domain.queries.tool.GetAllToolsQuery
 import org.ptss.support.domain.queries.tool.GetToolByIdQuery
-import org.ptss.support.infrastructure.handlers.queries.tool.GetAllToolsQueryHandler
+import org.ptss.support.infrastructure.handlers.queries.tools.GetAllToolsQueryHandler
 import org.ptss.support.infrastructure.util.executeWithExceptionLoggingAsync
 import org.slf4j.LoggerFactory
 

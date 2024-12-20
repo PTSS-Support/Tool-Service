@@ -2,8 +2,8 @@ package org.ptss.support.core.facades
 
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
-import org.ptss.support.api.dtos.requests.tool.CreateToolRequest
-import org.ptss.support.api.dtos.responses.tool.ToolResponse
+import org.ptss.support.api.dtos.requests.tools.CreateToolRequest
+import org.ptss.support.api.dtos.responses.tools.ToolResponse
 import org.ptss.support.core.mappers.ToolMapper
 import org.ptss.support.core.services.ToolService
 
