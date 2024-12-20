@@ -45,8 +45,10 @@ enum class ErrorCode(
     TOOL_DELETION_ERROR("TOOL_DELETION_ERROR", 400, "Failed to delete tool"),
 
     // Comment errors
+    COMMENT_UPDATE_ERROR("COMMENT_UPDATE_ERROR", 400, "Dailed to update comment"),
     COMMENT_VALIDATION_ERROR("COMMENT_VALIDATION_ERROR", 400, "Comment data validation failed"),
-    COMMENT_CREATION_ERROR("COMMENT_CREATION_ERROR", 400, "Failed to create comment");
+    COMMENT_CREATION_ERROR("COMMENT_CREATION_ERROR", 400, "Failed to create comment"),
+    COMMENT_DELETION_ERROR("COMMENT_DELETION_ERROR", 400, "Failed to delete comment");
 
     companion object {
         fun fromCode(code: String): ErrorCode? = values().find { it.code == code }
