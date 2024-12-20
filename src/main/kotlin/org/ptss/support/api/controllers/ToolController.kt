@@ -10,13 +10,15 @@ import jakarta.ws.rs.core.Response
 import org.ptss.support.api.dtos.requests.tools.CreateToolRequest
 import org.ptss.support.api.dtos.responses.tools.ToolResponse
 import org.ptss.support.core.facades.ToolFacade
+import org.ptss.support.domain.enums.Role
 import org.ptss.support.domain.interfaces.controllers.IToolController
+import org.ptss.support.security.Authentication
 
 @Path("/tools")
 @ApplicationScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-//@Authentication(roles = [Role.PATIENT, Role.FAMILY_MEMBER, Role.HCP])
+@Authentication(roles = [Role.PATIENT, Role.FAMILY_MEMBER, Role.HCP])
 class ToolController(
     private val toolFacade: ToolFacade
     ) : IToolController {
