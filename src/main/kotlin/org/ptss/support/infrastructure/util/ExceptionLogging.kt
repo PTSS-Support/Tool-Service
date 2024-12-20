@@ -11,11 +11,12 @@ suspend fun <T> Logger.executeWithExceptionLoggingAsync(
     // Sanitize the arguments before logging them to prevent log injection
     val sanitizedArgs = args.map { sanitizeForLogging(it.toString()) }.toTypedArray()
 
+    val sanitizedLogMessage = sanitizeForLogging(logMessage)
     return try {
         operation()
     } catch (ex: Exception) {
         // Format and log the sanitized message
-        this.error(logMessage.format(*sanitizedArgs), ex)
+        this.error(sanitizedLogMessage.format(*sanitizedArgs), ex)
         throw exceptionHandling?.invoke(ex) ?: ex
     }
 }
