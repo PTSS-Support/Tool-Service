@@ -1,4 +1,4 @@
-package org.ptss.support.domain.commands
+package org.ptss.support.domain.commands.tool
 
 data class CreateToolCommand(
     val name: String,

@@ -1,7 +1,7 @@
 package org.ptss.support.infrastructure.handlers.commands.tool
 
 import jakarta.enterprise.context.ApplicationScoped
-import org.ptss.support.domain.commands.DeleteToolCommand
+import org.ptss.support.domain.commands.tool.DeleteToolCommand
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
 import org.ptss.support.infrastructure.repositories.ToolRepository
 import org.ptss.support.infrastructure.util.executeWithExceptionLoggingAsync

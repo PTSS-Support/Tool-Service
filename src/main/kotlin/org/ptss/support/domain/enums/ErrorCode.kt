@@ -23,6 +23,12 @@ enum class ErrorCode(
     GROUP_NOT_FOUND("GROUP_NOT_FOUND", 404, "The specified group does not exist"),
     NOT_FOUND("NOT_FOUND", 404, "The requested resource was not found"),
 
+    // Tool errors
+    TOOL_NOT_FOUND("TOOL_NOT_FOUND", 404, "The requested tool was not found"),
+
+    // Comment errors
+    COMMENT_NOT_FOUND("COMMENT_NOT_FOUND", 404, "The requested comment was not found"),
+
     INTERNAL_ERROR("INTERNAL_ERROR", 500, "An unexpected system error occurred"),
     RATE_LIMIT_EXCEEDED("RATE_LIMIT_EXCEEDED", 429, "Too many requests"),
     SERVICE_UNAVAILABLE("SERVICE_UNAVAILABLE", 503, "Service temporarily unavailable"),
@@ -34,10 +40,13 @@ enum class ErrorCode(
     PRODUCT_CREATION_ERROR("PRODUCT_CREATION_ERROR", 400, "Failed to create product"),
 
     // Tool errors
-    TOOL_NOT_FOUND("TOOL_NOT_FOUND", 404, "The requested tool was not found"),
     TOOL_VALIDATION_ERROR("TOOL_VALIDATION_ERROR", 400, "tool data validation failed"),
     TOOL_CREATION_ERROR("TOOL_CREATION_ERROR", 400, "Failed to create tool"),
-    TOOL_DELETION_ERROR("TOOL_DELETION_ERROR", 400, "Failed to delete tool");
+    TOOL_DELETION_ERROR("TOOL_DELETION_ERROR", 400, "Failed to delete tool"),
+
+    // Comment errors
+    COMMENT_VALIDATION_ERROR("COMMENT_VALIDATION_ERROR", 400, "Comment data validation failed"),
+    COMMENT_CREATION_ERROR("COMMENT_CREATION_ERROR", 400, "Failed to create comment");
 
     companion object {
         fun fromCode(code: String): ErrorCode? = values().find { it.code == code }

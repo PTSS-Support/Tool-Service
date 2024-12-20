@@ -2,7 +2,7 @@ package org.ptss.support.infrastructure.handlers.commands.tool
 
 import jakarta.enterprise.context.ApplicationScoped
 import org.ptss.support.common.exceptions.APIException
-import org.ptss.support.domain.commands.CreateToolCommand
+import org.ptss.support.domain.commands.tool.CreateToolCommand
 import org.ptss.support.domain.enums.ErrorCode
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
 import org.ptss.support.domain.models.Tool
