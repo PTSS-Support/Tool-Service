@@ -1,4 +1,4 @@
-package org.ptss.support.infrastructure.handlers.queries.comment
+package org.ptss.support.infrastructure.handlers.queries.comments
 
 import jakarta.enterprise.context.ApplicationScoped
 import org.ptss.support.domain.interfaces.queries.IQueryHandler

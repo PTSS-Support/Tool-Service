@@ -1,8 +1,8 @@
 package org.ptss.support.core.mappers
 
-import org.ptss.support.api.dtos.requests.comment.CreateCommentRequest
-import org.ptss.support.api.dtos.responses.comment.CommentResponse
-import org.ptss.support.domain.commands.comment.CreateCommentCommand
+import org.ptss.support.api.dtos.requests.comments.CreateCommentRequest
+import org.ptss.support.api.dtos.responses.comments.CommentResponse
+import org.ptss.support.domain.commands.comments.CreateCommentCommand
 import org.ptss.support.domain.models.Comment
 
 object CommentMapper {

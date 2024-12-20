@@ -1,10 +1,7 @@
-package org.ptss.support.infrastructure.handlers.commands.comment
+package org.ptss.support.infrastructure.handlers.commands.comments
 
 import jakarta.enterprise.context.ApplicationScoped
-import org.ptss.support.api.dtos.responses.comment.CommentResponse
-import org.ptss.support.common.exceptions.APIException
-import org.ptss.support.domain.commands.comment.CreateCommentCommand
-import org.ptss.support.domain.enums.ErrorCode
+import org.ptss.support.domain.commands.comments.CreateCommentCommand
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
 import org.ptss.support.domain.models.Comment
 import org.ptss.support.infrastructure.repositories.CommentRepository
@@ -34,12 +31,6 @@ class CreateCommentCommandHandler(
 
                 // Return the complete comment object
                 comment
-                /*val createdId = commentRepository.create(comment)
-                // Fetch the created comment to return a complete object
-                commentRepository.getById(createdId) ?: throw APIException(
-                    errorCode = ErrorCode.COMMENT_CREATION_ERROR,
-                    message = "Comment created but couldn't be retrieved"
-                )*/
             },
             logMessage = "Error creating comment for toolId: ${command.toolId}"
         )

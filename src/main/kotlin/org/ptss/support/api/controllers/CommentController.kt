@@ -7,10 +7,9 @@ import jakarta.ws.rs.PathParam
 import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
-import org.ptss.support.api.dtos.requests.comment.CreateCommentRequest
-import org.ptss.support.api.dtos.requests.comment.UpdateCommentRequest
-import org.ptss.support.api.dtos.responses.comment.CommentResponse
-import org.ptss.support.api.dtos.responses.tool.ToolResponse
+import org.ptss.support.api.dtos.requests.comments.CreateCommentRequest
+import org.ptss.support.api.dtos.requests.comments.UpdateCommentRequest
+import org.ptss.support.api.dtos.responses.comments.CommentResponse
 import org.ptss.support.core.facades.CommentFacade
 import org.ptss.support.domain.enums.Role
 import org.ptss.support.domain.interfaces.controllers.ICommentController

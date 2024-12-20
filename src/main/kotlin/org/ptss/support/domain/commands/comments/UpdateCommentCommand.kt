@@ -1,4 +1,4 @@
-package org.ptss.support.domain.commands.comment
+package org.ptss.support.domain.commands.comments
 
 data class UpdateCommentCommand(
     val toolId: String,

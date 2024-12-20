@@ -1,4 +1,4 @@
-package org.ptss.support.api.dtos.responses.comment
+package org.ptss.support.api.dtos.responses.comments
 
 import java.time.Instant
 import java.time.ZonedDateTime

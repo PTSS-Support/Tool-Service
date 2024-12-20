@@ -1,8 +1,8 @@
-package org.ptss.support.infrastructure.handlers.commands.comment
+package org.ptss.support.infrastructure.handlers.commands.comments
 
 import jakarta.enterprise.context.ApplicationScoped
 import org.ptss.support.common.exceptions.APIException
-import org.ptss.support.domain.commands.comment.UpdateCommentCommand
+import org.ptss.support.domain.commands.comments.UpdateCommentCommand
 import org.ptss.support.domain.enums.ErrorCode
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
 import org.ptss.support.domain.models.Comment

@@ -2,9 +2,9 @@ package org.ptss.support.core.facades
 
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
-import org.ptss.support.api.dtos.requests.comment.CreateCommentRequest
-import org.ptss.support.api.dtos.requests.comment.UpdateCommentRequest
-import org.ptss.support.api.dtos.responses.comment.CommentResponse
+import org.ptss.support.api.dtos.requests.comments.CreateCommentRequest
+import org.ptss.support.api.dtos.requests.comments.UpdateCommentRequest
+import org.ptss.support.api.dtos.responses.comments.CommentResponse
 import org.ptss.support.core.mappers.CommentMapper
 import org.ptss.support.core.services.CommentService
 
