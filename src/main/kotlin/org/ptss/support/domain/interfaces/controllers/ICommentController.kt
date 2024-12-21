@@ -1,13 +1,9 @@
 package org.ptss.support.domain.interfaces.controllers
+import jakarta.ws.rs.*
+import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import org.eclipse.microprofile.openapi.annotations.Operation
 
-import jakarta.ws.rs.GET
-import jakarta.ws.rs.POST
-import jakarta.ws.rs.DELETE
-import jakarta.ws.rs.PATCH
-import jakarta.ws.rs.Path
-import jakarta.ws.rs.PathParam
 import org.eclipse.microprofile.openapi.annotations.media.Content
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
@@ -18,6 +14,8 @@ import org.ptss.support.api.dtos.requests.comments.UpdateCommentRequest
 import org.ptss.support.api.dtos.responses.comments.CommentResponse
 import org.ptss.support.common.exceptions.ServiceError
 
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 interface ICommentController {
     @GET
     @Operation(summary = "Get all tools", description = "Retrieves a list of all tools")
