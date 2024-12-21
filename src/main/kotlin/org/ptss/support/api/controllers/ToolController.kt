@@ -18,7 +18,7 @@ import org.ptss.support.security.Authentication
 @ApplicationScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-//@Authentication(roles = [Role.PATIENT, Role.FAMILY_MEMBER, Role.HCP])
+@Authentication(roles = [Role.PATIENT, Role.FAMILY_MEMBER, Role.HCP])
 class ToolController(
     private val toolFacade: ToolFacade
     ) : IToolController {
