@@ -27,7 +27,7 @@ class CommentFacade @Inject constructor(
     }
 
 
-    suspend fun deleteComment(toolId: String, commentId: String) {
+    suspend fun deleteComment(toolId: String, commentId: String) =
         commentService.deleteCommentAsync(toolId, commentId)
-    }
+    
 }
