@@ -2,7 +2,7 @@ package org.ptss.support.core.mappers
 
 import org.ptss.support.api.dtos.requests.tools.CreateToolRequest
 import org.ptss.support.api.dtos.responses.media.MediaInfoResponse
-import org.ptss.support.domain.commands.tool.CreateToolCommand
+import org.ptss.support.domain.commands.tools.CreateToolCommand
 import org.ptss.support.api.dtos.responses.tools.ToolResponse
 import org.ptss.support.domain.models.Tool
 

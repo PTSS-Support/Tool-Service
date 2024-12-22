@@ -9,7 +9,7 @@ import org.ptss.support.domain.commands.comments.UpdateCommentCommand
 import org.ptss.support.domain.enums.ErrorCode
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
 import org.ptss.support.domain.models.Comment
-import org.ptss.support.domain.queries.comment.GetAllCommentsQuery
+import org.ptss.support.domain.queries.comments.GetAllCommentsQuery
 import org.ptss.support.infrastructure.handlers.queries.comments.GetAllCommentsQueryHandler
 import org.ptss.support.infrastructure.util.executeWithExceptionLoggingAsync
 import org.slf4j.LoggerFactory

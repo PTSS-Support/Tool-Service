@@ -1,92 +1,87 @@
 package org.ptss.support.infrastructure.repositories
 
+import io.quarkus.hibernate.orm.panache.kotlin.PanacheRepository
 import jakarta.enterprise.context.ApplicationScoped
+import jakarta.inject.Inject
+import jakarta.persistence.EntityManager
+import jakarta.transaction.Transactional
 import org.ptss.support.domain.interfaces.repositories.ICommentRepository
 import org.ptss.support.domain.models.Comment
-import org.ptss.support.domain.models.Tool
 import org.ptss.support.infrastructure.persistence.entities.CommentEntity
-import java.sql.Timestamp
-import java.time.Instant
+import org.ptss.support.infrastructure.persistence.entities.ToolEntity
+import java.util.UUID
 
 @ApplicationScoped
-class CommentRepository : BaseRepository<Comment>(), ICommentRepository {
-    override fun getAll(toolId: String): List<Comment> {
-        return useConnection { conn ->
-            val query = """
-                SELECT c.id, c.tool_id, c.content, c.sender_id, c.sender_name, c.created_at, c.last_edited_at 
-                FROM comments c
-                JOIN tools t ON t.id = c.tool_id
-                WHERE c.tool_id = ?::UUID
+class CommentRepository @Inject constructor(
+    private val entityManager: EntityManager
+) : ICommentRepository, PanacheRepository<CommentEntity> {
+
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    override suspend fun getAll(toolId: String): List<Comment> {
+        val toolIdUUID = UUID.fromString(toolId)
+        return entityManager.createQuery(
             """
-            conn.prepareStatement(query).use { statement ->
-                statement.setString(1, toolId)
-                val resultSet = statement.executeQuery()
-                generateSequence {
-                    if (resultSet.next()) CommentEntity.fromResultSet(resultSet)
-                    else null
-                }.map { it.toDomain() }.toList()
-            }
-        }
+            SELECT c 
+            FROM CommentEntity c 
+            JOIN c.tool t 
+            WHERE t.id = :toolId
+            """, CommentEntity::class.java
+        )
+            .setParameter("toolId", toolIdUUID)
+            .resultList
+            .map { it.toDomain() }
     }
 
-    override fun update(toolId: String, commentId: String, content: String): Comment? {
-        return useConnection { conn ->
-            val query = """
-            UPDATE comments 
-            SET content = ?, last_edited_at = ? 
-            WHERE id = ?::UUID AND tool_id = ?::UUID
-            RETURNING id, tool_id, content, sender_id, sender_name, created_at, last_edited_at
-        """.trimIndent()
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    override suspend fun create(comment: Comment): String {
+        val toolEntity = entityManager.find(ToolEntity::class.java, UUID.fromString(comment.toolId))
+            ?: throw IllegalArgumentException("Tool with ID ${comment.toolId} does not exist")
 
-            conn.prepareStatement(query).use { statement ->
-                statement.setString(1, content)
-                statement.setTimestamp(2, Timestamp.from(Instant.now()))
-                statement.setString(3, commentId)
-                statement.setString(4, toolId)
+        val entity = CommentEntity.fromDomain(comment, toolEntity)
 
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    CommentEntity.fromResultSet(resultSet).toDomain()
-                } else null
-            }
-        }
+        // Ensure the ID is null before persisting
+        entity.id = null
+
+        entityManager.persist(entity)
+        entityManager.flush()
+        return entity.id.toString()
     }
 
-    override fun delete(toolId: String, commentId: String): Comment? {
-        return useConnection { conn ->
-            val query = """
-            DELETE FROM comments
-            WHERE id = ?::UUID AND tool_id = ?::UUID
-            RETURNING id, tool_id, content, sender_id, sender_name, created_at, last_edited_at
-        """.trimIndent()
-            conn.prepareStatement(query).use { statement ->
-                statement.setString(1, commentId)
-                statement.setString(2, toolId)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) CommentEntity.fromResultSet(resultSet).toDomain() else null
-            }
-        }
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    override suspend fun update(toolId: String, commentId: String, content: String): Comment? {
+        val entity = findCommentByToolAndId(toolId, commentId) ?: return null
+
+        entity.content = content
+        entity.lastEditedAt = java.time.Instant.now()
+        entityManager.merge(entity)
+
+        return entity.toDomain()
     }
 
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    override suspend fun delete(toolId: String, commentId: String): Comment? {
+        val entity = findCommentByToolAndId(toolId, commentId) ?: return null
 
-    override fun create(comment: Comment): String {
-        return useConnection { conn ->
-            val query = """
-            INSERT INTO comments (id, tool_id, content, sender_id, sender_name, created_at, last_edited_at)
-            VALUES (?::UUID, ?::UUID, ?, ?, ?, ?, ?)
-        """.trimIndent()
-            conn.prepareStatement(query).use { statement ->
-                statement.setString(1, comment.id)
-                statement.setString(2, comment.toolId)
-                statement.setString(3, comment.content)
-                statement.setString(4, comment.senderId)
-                statement.setString(5, comment.senderName)
-                statement.setTimestamp(6, Timestamp.from(comment.createdAt))
-                statement.setTimestamp(7, comment.lastEditedAt?.let { Timestamp.from(it) })
-                statement.executeUpdate()
-            }
-            comment.id
-        }
+        entityManager.remove(entity)
+        return entity.toDomain()
     }
 
+    // Helper function to find a comment by toolId and commentId
+    private fun findCommentByToolAndId(toolId: String, commentId: String): CommentEntity? {
+        val toolIdUUID = UUID.fromString(toolId)
+        val commentIdUUID = UUID.fromString(commentId)
+
+        return entityManager.createQuery(
+            """
+            SELECT c 
+            FROM CommentEntity c 
+            JOIN c.tool t 
+            WHERE t.id = :toolId AND c.id = :commentId
+            """, CommentEntity::class.java
+        )
+            .setParameter("toolId", toolIdUUID)
+            .setParameter("commentId", commentIdUUID)
+            .resultList
+            .firstOrNull()
+    }
 }

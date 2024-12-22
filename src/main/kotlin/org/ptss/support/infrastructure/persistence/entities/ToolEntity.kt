@@ -1,41 +1,76 @@
 package org.ptss.support.infrastructure.persistence.entities
 
+import jakarta.persistence.Entity
+import jakarta.persistence.Table
+import jakarta.persistence.Id
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.Column
 import org.ptss.support.domain.models.Tool
-import java.sql.ResultSet
 import java.time.Instant
+import java.util.UUID
 
-data class ToolEntity(
-    val id: String,
-    val name: String,
-    val description: String,
-    val category: List<String>,
-    val createdBy: String,
-    val createdAt: Instant
-) {
-    fun toDomain(): Tool {
-        return Tool(
-            id = id,
-            name = name,
-            description = description,
-            category = category,
-            createdBy = createdBy,
-            createdAt = createdAt,
-            media = emptyList()
-        )
+@Entity
+@Table(name = "tools")
+class ToolEntity {
+
+    @Id
+    @GeneratedValue
+    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "UUID")
+    var id: UUID? = null
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    var name: String = ""
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    var description: String = ""
+
+    @Column(name = "category", nullable = false, columnDefinition = "TEXT[]")
+    var category: List<String> = emptyList()
+
+    @Column(name = "created_by", nullable = false)
+    var createdBy: String = ""
+
+    @Column(name = "created_at", nullable = false)
+    var createdAt: Instant = Instant.now()
+
+    // No-arg constructor for JPA
+    constructor()
+
+    // Secondary constructor
+    constructor(
+        id: UUID?,
+        name: String,
+        description: String,
+        category: List<String>,
+        createdBy: String,
+        createdAt: Instant
+    ) {
+        this.id = id
+        this.name = name
+        this.description = description
+        this.category = category
+        this.createdBy = createdBy
+        this.createdAt = createdAt
     }
 
+    fun toDomain() = Tool(
+        id = id.toString(),
+        name = name,
+        description = description,
+        category = category,
+        createdBy = createdBy,
+        createdAt = createdAt,
+        media = emptyList() // Placeholder for media
+    )
+
     companion object {
-        fun fromResultSet(resultSet: ResultSet): ToolEntity {
-            return ToolEntity(
-                id = resultSet.getString("id"),
-                name = resultSet.getString("name"),
-                description = resultSet.getString("description"),
-                createdBy = resultSet.getString("created_by"),
-                createdAt = resultSet.getTimestamp("created_at").toInstant(),
-                category = resultSet.getArray("category")?.let { array ->
-                    (array.array as Array<String>).toList()
-                } ?: emptyList()
-            )
-        }
+        fun fromDomain(tool: Tool) = ToolEntity(
+            id = if (tool.id.isNotBlank()) UUID.fromString(tool.id) else null,
+            name = tool.name,
+            description = tool.description,
+            category = tool.category,
+            createdBy = tool.createdBy,
+            createdAt = tool.createdAt
+        )
     }
 }

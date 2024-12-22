@@ -2,14 +2,14 @@ package org.ptss.support.core.services
 
 import jakarta.enterprise.context.ApplicationScoped
 import org.ptss.support.common.exceptions.APIException
-import org.ptss.support.domain.commands.tool.CreateToolCommand
-import org.ptss.support.domain.commands.tool.DeleteToolCommand
+import org.ptss.support.domain.commands.tools.CreateToolCommand
+import org.ptss.support.domain.commands.tools.DeleteToolCommand
 import org.ptss.support.domain.enums.ErrorCode
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
 import org.ptss.support.domain.interfaces.queries.IQueryHandler
 import org.ptss.support.domain.models.Tool
-import org.ptss.support.domain.queries.tool.GetAllToolsQuery
-import org.ptss.support.domain.queries.tool.GetToolByIdQuery
+import org.ptss.support.domain.queries.tools.GetAllToolsQuery
+import org.ptss.support.domain.queries.tools.GetToolByIdQuery
 import org.ptss.support.infrastructure.handlers.queries.tools.GetAllToolsQueryHandler
 import org.ptss.support.infrastructure.util.executeWithExceptionLoggingAsync
 import org.slf4j.LoggerFactory
