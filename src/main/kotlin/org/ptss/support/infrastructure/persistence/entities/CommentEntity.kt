@@ -3,7 +3,6 @@ package org.ptss.support.infrastructure.persistence.entities
 import org.ptss.support.domain.models.Comment
 import java.sql.ResultSet
 import java.time.Instant
-import java.time.ZonedDateTime
 
 data class CommentEntity(
     val id: String,
@@ -12,7 +11,7 @@ data class CommentEntity(
     val senderId: String,
     val senderName: String,
     val createdAt: Instant,
-    val lastEditedAt: ZonedDateTime?
+    val lastEditedAt: Instant?
 ) {
     fun toDomain(): Comment {
         return Comment(
@@ -35,9 +34,7 @@ data class CommentEntity(
                 senderId = resultSet.getString("sender_id"),
                 senderName = resultSet.getString("sender_name"),
                 createdAt = resultSet.getTimestamp("created_at").toInstant(),
-                lastEditedAt = resultSet.getTimestamp("last_edited_at")?.toInstant()?.let {
-                    ZonedDateTime.ofInstant(it, java.time.ZoneId.systemDefault())
-                }
+                lastEditedAt = resultSet.getTimestamp("last_edited_at")?.toInstant()
             )
         }
     }

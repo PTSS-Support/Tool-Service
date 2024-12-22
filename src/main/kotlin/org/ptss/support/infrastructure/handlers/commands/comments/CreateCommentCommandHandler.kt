@@ -29,7 +29,6 @@ class CreateCommentCommandHandler(
                 )
                 commentRepository.create(comment)
 
-                // Return the complete comment object
                 comment
             },
             logMessage = "Error creating comment for toolId: ${command.toolId}"

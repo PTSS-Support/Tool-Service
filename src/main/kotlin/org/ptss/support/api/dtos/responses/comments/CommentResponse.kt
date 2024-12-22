@@ -1,7 +1,6 @@
 package org.ptss.support.api.dtos.responses.comments
 
 import java.time.Instant
-import java.time.ZonedDateTime
 
 data class CommentResponse(
     val id: String,
@@ -9,5 +8,5 @@ data class CommentResponse(
     val senderId: String,
     val senderName: String,
     val createdAt: Instant,
-    val lastEditedAt: ZonedDateTime? = null
+    val lastEditedAt: Instant? = null
 )
