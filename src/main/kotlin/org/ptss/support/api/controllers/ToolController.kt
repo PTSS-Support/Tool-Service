@@ -2,10 +2,7 @@ package org.ptss.support.api.controllers
 
 import com.azure.core.annotation.PathParam
 import jakarta.enterprise.context.ApplicationScoped
-import jakarta.ws.rs.Produces
-import jakarta.ws.rs.Consumes
 import jakarta.ws.rs.Path
-import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import org.ptss.support.api.dtos.requests.tools.CreateToolRequest
 import org.ptss.support.api.dtos.responses.tools.ToolResponse
