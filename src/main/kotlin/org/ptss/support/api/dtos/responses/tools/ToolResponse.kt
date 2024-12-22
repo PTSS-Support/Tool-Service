@@ -1,4 +1,4 @@
-package org.ptss.support.api.dtos.responses.tool
+package org.ptss.support.api.dtos.responses.tools
 
 import org.ptss.support.api.dtos.responses.media.MediaInfoResponse
 import java.time.Instant

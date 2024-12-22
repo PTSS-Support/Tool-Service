@@ -1,4 +1,4 @@
-package org.ptss.support.api.dtos.requests.tool
+package org.ptss.support.api.dtos.requests.tools
 
 data class CreateToolRequest(
     val name: String,

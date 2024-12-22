@@ -7,8 +7,8 @@ import jakarta.ws.rs.Consumes
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
-import org.ptss.support.api.dtos.requests.tool.CreateToolRequest
-import org.ptss.support.api.dtos.responses.tool.ToolResponse
+import org.ptss.support.api.dtos.requests.tools.CreateToolRequest
+import org.ptss.support.api.dtos.responses.tools.ToolResponse
 import org.ptss.support.core.facades.ToolFacade
 import org.ptss.support.domain.enums.Role
 import org.ptss.support.domain.interfaces.controllers.IToolController

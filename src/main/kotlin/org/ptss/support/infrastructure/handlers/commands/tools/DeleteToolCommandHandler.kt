@@ -1,4 +1,4 @@
-package org.ptss.support.infrastructure.handlers.commands.tool
+package org.ptss.support.infrastructure.handlers.commands.tools
 
 import jakarta.enterprise.context.ApplicationScoped
 import org.ptss.support.domain.commands.tool.DeleteToolCommand

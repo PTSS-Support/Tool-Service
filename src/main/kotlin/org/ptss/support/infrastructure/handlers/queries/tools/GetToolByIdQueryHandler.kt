@@ -1,4 +1,4 @@
-package org.ptss.support.infrastructure.handlers.queries.tool
+package org.ptss.support.infrastructure.handlers.queries.tools
 
 import jakarta.enterprise.context.ApplicationScoped
 import org.ptss.support.domain.interfaces.queries.IQueryHandler
