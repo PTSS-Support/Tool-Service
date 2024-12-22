@@ -1,27 +1,18 @@
 package org.ptss.support.infrastructure.repositories
 
 import jakarta.inject.Inject
+import jakarta.persistence.EntityManager
 import org.ptss.support.infrastructure.config.PostgreSQLConfig
 import java.sql.Connection
 import java.sql.DriverManager
 
 abstract class BaseRepository<T> {
+
     @Inject
-    protected lateinit var config: PostgreSQLConfig
+    protected lateinit var entityManager: EntityManager
 
-    // Remove the lazy connection property and create a function to get connection
-    protected fun getConnection(): Connection {
-        return DriverManager.getConnection(
-            config.url(),
-            config.username(),
-            config.password()
-        )
-    }
-
-    protected fun <R> useConnection(block: (Connection) -> R): R {
-        // Create a new connection each time
-        return getConnection().use { conn ->
-            block(conn)
-        }
+    // Use EntityManager directly for database operations
+    protected fun <R> useEntityManager(block: (EntityManager) -> R): R {
+        return block(entityManager)
     }
 }
