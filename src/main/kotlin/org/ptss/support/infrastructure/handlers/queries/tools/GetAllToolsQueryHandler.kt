@@ -12,7 +12,6 @@ import org.ptss.support.domain.queries.tools.GetAllToolsQuery
 class GetAllToolsQueryHandler (
     private val toolRepository: IToolRepository
 ) : IQueryHandler<GetAllToolsQuery, List<Tool>> {
-
     override suspend fun handleAsync(query: GetAllToolsQuery): List<Tool> {
         return withContext(Dispatchers.IO) {
             toolRepository.getAll()

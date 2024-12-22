@@ -12,7 +12,6 @@ import org.ptss.support.infrastructure.repositories.CommentRepository
 class GetAllCommentsQueryHandler(
     private val commentRepository: CommentRepository
 ) : IQueryHandler<GetAllCommentsQuery, List<Comment>> {
-
     override suspend fun handleAsync(query: GetAllCommentsQuery): List<Comment> {
         return withContext(Dispatchers.IO) {
             commentRepository.getAll(query.toolId)
