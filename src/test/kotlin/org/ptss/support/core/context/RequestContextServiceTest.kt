@@ -1,7 +1,6 @@
 package org.ptss.support.core.context
 
 import io.quarkus.test.junit.QuarkusTest
-import io.quarkus.test.junit.TestProfile
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
@@ -9,7 +8,6 @@ import org.junit.jupiter.api.Test
 import jakarta.inject.Inject
 
 @QuarkusTest
-@TestProfile(NoDbTestProfile::class)
 class RequestContextServiceTest {
 
     @Inject
