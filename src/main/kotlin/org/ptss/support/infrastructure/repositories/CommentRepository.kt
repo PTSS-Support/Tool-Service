@@ -16,7 +16,7 @@ class CommentRepository @Inject constructor(
     private val entityManager: EntityManager
 ) : ICommentRepository, PanacheRepository<CommentEntity> {
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Transactional
     override suspend fun getAll(toolId: String): List<Comment> {
         val toolIdUUID = UUID.fromString(toolId)
         return entityManager.createQuery(
@@ -32,7 +32,7 @@ class CommentRepository @Inject constructor(
             .map { it.toDomain() }
     }
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Transactional
     override suspend fun create(comment: Comment): String {
         val toolEntity = entityManager.find(ToolEntity::class.java, UUID.fromString(comment.toolId))
             ?: throw IllegalArgumentException("Tool with ID ${comment.toolId} does not exist")
@@ -47,7 +47,7 @@ class CommentRepository @Inject constructor(
         return entity.id.toString()
     }
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Transactional
     override suspend fun update(toolId: String, commentId: String, content: String): Comment? {
         val entity = findCommentByToolAndId(toolId, commentId) ?: return null
 
@@ -58,7 +58,7 @@ class CommentRepository @Inject constructor(
         return entity.toDomain()
     }
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Transactional
     override suspend fun delete(toolId: String, commentId: String): Comment? {
         val entity = findCommentByToolAndId(toolId, commentId) ?: return null
 

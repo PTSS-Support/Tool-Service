@@ -15,7 +15,7 @@ class ToolRepository @Inject constructor(
     private val entityManager: EntityManager
 ) : IToolRepository, PanacheRepository<ToolEntity> {
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Transactional
     override suspend fun getAll(): List<Tool> {
         return entityManager
             .createQuery("SELECT t FROM ToolEntity t", ToolEntity::class.java)
@@ -23,7 +23,7 @@ class ToolRepository @Inject constructor(
             .map { it.toDomain() }
     }
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Transactional
     override suspend fun getById(id: String): Tool? {
         val toolId = UUID.fromString(id)
         return entityManager
@@ -34,7 +34,7 @@ class ToolRepository @Inject constructor(
             ?.toDomain()
     }
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Transactional
     override suspend fun delete(id: String): Tool? {
         val toolId = UUID.fromString(id)
         val toolEntity = entityManager
@@ -51,7 +51,7 @@ class ToolRepository @Inject constructor(
         }
     }
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Transactional
     override suspend fun create(tool: Tool): String {
         val toolEntity = ToolEntity.fromDomain(tool)
 
