@@ -18,7 +18,7 @@ import org.ptss.support.common.exceptions.ServiceError
 @Consumes(MediaType.APPLICATION_JSON)
 interface ICommentController {
     @GET
-    @Operation(summary = "Get all tools", description = "Retrieves a list of all tools")
+    @Operation(summary = "Get all comments", description = "Retrieves a list of all comments")
     @APIResponses(
         APIResponse(
             responseCode = "200",
