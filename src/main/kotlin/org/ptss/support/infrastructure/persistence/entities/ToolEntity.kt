@@ -29,6 +29,7 @@ class ToolEntity {
     @Column(name = "created_at", nullable = false)
     var createdAt: Instant = Instant.now()
 
+    // One-to-many relationship with MediaEntity
     @OneToMany(mappedBy = "tool", cascade = [CascadeType.ALL], orphanRemoval = true)
     var mediaItems: MutableList<MediaEntity> = mutableListOf()
 
@@ -42,7 +43,8 @@ class ToolEntity {
         description: String,
         category: List<String>,
         createdBy: String,
-        createdAt: Instant
+        createdAt: Instant,
+        mediaItems: MutableList<MediaEntity> = mutableListOf()
     ) {
         this.id = id
         this.name = name
@@ -50,6 +52,7 @@ class ToolEntity {
         this.category = category
         this.createdBy = createdBy
         this.createdAt = createdAt
+        this.mediaItems = mediaItems
     }
 
     fun toDomain() = Tool(
@@ -70,6 +73,8 @@ class ToolEntity {
             category = tool.category,
             createdBy = tool.createdBy,
             createdAt = tool.createdAt
-        )
+        ).apply {
+            mediaItems = tool.media.map { MediaEntity.fromDomain(it, this) }.toMutableList()
+        }
     }
 }

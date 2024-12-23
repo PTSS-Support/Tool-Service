@@ -8,6 +8,5 @@ import java.io.InputStream
 
 data class UploadMediaRequest(
     @FormParam("file")
-    @PartType(MediaType.APPLICATION_OCTET_STREAM)
     var file: InputStream? = null
 )

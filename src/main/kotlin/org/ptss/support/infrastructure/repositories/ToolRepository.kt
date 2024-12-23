@@ -18,21 +18,29 @@ class ToolRepository @Inject constructor(
     @Transactional
     override suspend fun getAll(): List<Tool> {
         return entityManager
-            .createQuery("SELECT t FROM ToolEntity t", ToolEntity::class.java)
+            .createQuery(
+                "SELECT t FROM ToolEntity t LEFT JOIN FETCH t.mediaItems",
+                ToolEntity::class.java
+            )
             .resultList
             .map { it.toDomain() }
     }
+
 
     @Transactional
     override suspend fun getById(id: String): Tool? {
         val toolId = UUID.fromString(id)
         return entityManager
-            .createQuery("SELECT t FROM ToolEntity t WHERE t.id = :id", ToolEntity::class.java)
+            .createQuery(
+                "SELECT t FROM ToolEntity t LEFT JOIN FETCH t.mediaItems WHERE t.id = :id",
+                ToolEntity::class.java
+            )
             .setParameter("id", toolId)
             .resultList
             .firstOrNull()
             ?.toDomain()
     }
+
 
     @Transactional
     override suspend fun delete(id: String): Tool? {

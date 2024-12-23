@@ -8,6 +8,7 @@ import java.util.UUID
 @Entity
 @Table(name = "media")
 class MediaEntity {
+
     @Id
     @GeneratedValue
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "UUID")
@@ -20,12 +21,15 @@ class MediaEntity {
     @Column(name = "type", nullable = false)
     lateinit var type: MediaType
 
+    // Many-to-one relationship with ToolEntity
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tool_id", nullable = false)
     lateinit var tool: ToolEntity
 
+    // No-arg constructor for JPA
     constructor()
 
+    // Constructor for creating the entity
     constructor(id: UUID?, url: String, type: MediaType, tool: ToolEntity) {
         this.id = id
         this.url = url
