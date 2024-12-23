@@ -5,6 +5,7 @@ import jakarta.persistence.Table
 import jakarta.persistence.Id
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Column
+import jakarta.persistence.ManyToMany
 import org.ptss.support.domain.models.Tool
 import java.time.Instant
 import java.util.UUID
@@ -24,8 +25,8 @@ class ToolEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     var description: String = ""
 
-    @Column(name = "category", nullable = false, columnDefinition = "TEXT[]")
-    var category: List<String> = emptyList()
+    @ManyToMany(mappedBy = "tools", targetEntity = CategoryEntity::class)
+    var categories: List<CategoryEntity> = emptyList()
 
     @Column(name = "created_by", nullable = false)
     var createdBy: String = ""
@@ -33,22 +34,20 @@ class ToolEntity {
     @Column(name = "created_at", nullable = false)
     var createdAt: Instant = Instant.now()
 
-    // No-arg constructor for JPA
     constructor()
 
-    // Secondary constructor
     constructor(
         id: UUID?,
         name: String,
         description: String,
-        category: List<String>,
+        categories: List<CategoryEntity>,
         createdBy: String,
         createdAt: Instant
     ) {
         this.id = id
         this.name = name
         this.description = description
-        this.category = category
+        this.categories = categories
         this.createdBy = createdBy
         this.createdAt = createdAt
     }
@@ -57,20 +56,21 @@ class ToolEntity {
         id = id.toString(),
         name = name,
         description = description,
-        category = category,
+        category = categories.map { it.category }, // Map category names
         createdBy = createdBy,
         createdAt = createdAt,
-        media = emptyList() // Placeholder for media
+        media = emptyList()
     )
 
     companion object {
-        fun fromDomain(tool: Tool) = ToolEntity(
+        fun fromDomain(tool: Tool, categories: List<CategoryEntity>) = ToolEntity(
             id = if (tool.id.isNotBlank()) UUID.fromString(tool.id) else null,
             name = tool.name,
             description = tool.description,
-            category = tool.category,
+            categories = categories,
             createdBy = tool.createdBy,
             createdAt = tool.createdAt
         )
     }
 }
+

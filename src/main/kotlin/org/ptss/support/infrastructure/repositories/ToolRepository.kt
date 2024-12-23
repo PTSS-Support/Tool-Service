@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.ptss.support.domain.interfaces.repositories.IToolRepository
 import org.ptss.support.domain.models.Tool
+import org.ptss.support.infrastructure.persistence.entities.CategoryEntity
 import org.ptss.support.infrastructure.persistence.entities.ToolEntity
 import java.util.UUID
 
@@ -53,9 +54,19 @@ class ToolRepository @Inject constructor(
 
     @Transactional
     override suspend fun create(tool: Tool): String {
-        val toolEntity = ToolEntity.fromDomain(tool)
+        val categoryEntities = tool.category.map { categoryName ->
+            entityManager.find(CategoryEntity::class.java, categoryName)
+        }
 
+        val toolEntity = ToolEntity.fromDomain(tool, categoryEntities)
         toolEntity.id = null
+
+        // Update bi-directional relationship
+        categoryEntities.forEach { category ->
+            if (!category.tools.contains(toolEntity)) {
+                category.tools = category.tools + toolEntity
+            }
+        }
 
         entityManager.persist(toolEntity)
         entityManager.flush()

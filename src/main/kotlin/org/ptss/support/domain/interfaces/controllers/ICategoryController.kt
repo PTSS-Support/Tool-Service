@@ -11,6 +11,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
+import org.ptss.support.api.dtos.responses.categories.CategoryResponse
 import org.ptss.support.api.dtos.responses.comments.CommentResponse
 import org.ptss.support.common.exceptions.ServiceError
 
@@ -22,8 +23,8 @@ interface ICategoryController {
     @APIResponses(
         APIResponse(
             responseCode = "200",
-            description = "List of comments successfully retrieved",
-            content = [Content(schema = Schema(implementation = Array<CommentResponse>::class))]
+            description = "List of categories successfully retrieved",
+            content = [Content(schema = Schema(implementation = Array<CategoryResponse>::class))]
         ),
         APIResponse(
             responseCode = "400",
@@ -43,8 +44,5 @@ interface ICategoryController {
             content = [Content(schema = Schema(implementation = ServiceError::class))]
         )
     )
-    suspend fun getAllComments(
-        @Parameter(description = "Tool ID", required = true)
-        @PathParam("toolId") toolId: String
-    ): List<CommentResponse>
+    suspend fun getAllCategories(): List<CategoryResponse>
 }
