@@ -11,11 +11,11 @@ import org.ptss.support.core.context.PostgresContextTestContainer
 class PostgresExampleTest {
 
     @Test
-    fun `should retrieve all tools`() {
+    fun `should return 401 Unauthorized for unauthenticated request`() {
         given()
             .`when`()
             .get("/tools")
             .then()
-            .statusCode(200)
+            .statusCode(401) // Assert that the response status is 401 Unauthorized
     }
 }
