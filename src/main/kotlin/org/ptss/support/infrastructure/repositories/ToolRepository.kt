@@ -1,67 +1,65 @@
 package org.ptss.support.infrastructure.repositories
 
+import io.quarkus.hibernate.orm.panache.kotlin.PanacheRepository
 import jakarta.enterprise.context.ApplicationScoped
+import jakarta.inject.Inject
+import jakarta.persistence.EntityManager
+import jakarta.transaction.Transactional
 import org.ptss.support.domain.interfaces.repositories.IToolRepository
 import org.ptss.support.domain.models.Tool
 import org.ptss.support.infrastructure.persistence.entities.ToolEntity
-import java.sql.Timestamp
+import java.util.UUID
 
 @ApplicationScoped
-class ToolRepository : BaseRepository<Tool>(), IToolRepository {
-    override fun getAll(): List<Tool> {
-        return useConnection { conn ->
-            val query = "SELECT id, name, description, created_by, created_at, category FROM tools"
-            conn.prepareStatement(query).use { statement ->
-                val resultSet = statement.executeQuery()
-                generateSequence { if (resultSet.next()) ToolEntity.fromResultSet(resultSet) else null }
-                    .map { it.toDomain() }
-                    .toList()
-            }
+class ToolRepository @Inject constructor(
+    private val entityManager: EntityManager
+) : IToolRepository, PanacheRepository<ToolEntity> {
+
+    @Transactional
+    override suspend fun getAll(): List<Tool> {
+        return entityManager
+            .createQuery("SELECT t FROM ToolEntity t", ToolEntity::class.java)
+            .resultList
+            .map { it.toDomain() }
+    }
+
+    @Transactional
+    override suspend fun getById(id: String): Tool? {
+        val toolId = UUID.fromString(id)
+        return entityManager
+            .createQuery("SELECT t FROM ToolEntity t WHERE t.id = :id", ToolEntity::class.java)
+            .setParameter("id", toolId)
+            .resultList
+            .firstOrNull()
+            ?.toDomain()
+    }
+
+    @Transactional
+    override suspend fun delete(id: String): Tool? {
+        val toolId = UUID.fromString(id)
+        val toolEntity = entityManager
+            .createQuery("SELECT t FROM ToolEntity t WHERE t.id = :id", ToolEntity::class.java)
+            .setParameter("id", toolId)
+            .resultList
+            .firstOrNull()
+
+        return if (toolEntity != null) {
+            entityManager.remove(toolEntity)
+            toolEntity.toDomain()
+        } else {
+            null
         }
     }
 
-    override fun getById(id: String): Tool? {
-        return useConnection { conn ->
-            val query = "SELECT id, name, description, created_by, created_at, category FROM tools WHERE id = ?::UUID"
-            conn.prepareStatement(query).use { statement ->
-                statement.setString(1, id)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) ToolEntity.fromResultSet(resultSet).toDomain() else null
-            }
-        }
+    @Transactional
+    override suspend fun create(tool: Tool): String {
+        val toolEntity = ToolEntity.fromDomain(tool)
+
+        toolEntity.id = null
+
+        entityManager.persist(toolEntity)
+        entityManager.flush()
+        return toolEntity.id.toString()
     }
 
-    override fun delete(id: String): Tool? {
-        return useConnection { conn ->
-            val tool = getById(id)
-            tool?.let {
-                val query = "DELETE FROM tools WHERE id = ?::UUID"
-                conn.prepareStatement(query).use { statement ->
-                    statement.setString(1, id)
-                    val rowsAffected = statement.executeUpdate()
-                    if (rowsAffected > 0) tool else null
-                }
-            }
-        }
-    }
-
-    override fun create(tool: Tool): String {
-        return useConnection { conn ->
-            val query = """
-            INSERT INTO tools (id, name, description, created_by, created_at, category)
-            VALUES (?::UUID, ?, ?, ?, ?, ?)
-        """.trimIndent()
-
-            conn.prepareStatement(query).use { statement ->
-                statement.setString(1, tool.id)
-                statement.setString(2, tool.name)
-                statement.setString(3, tool.description)
-                statement.setString(4, tool.createdBy)
-                statement.setTimestamp(5, Timestamp.from(tool.createdAt))
-                statement.setArray(6, conn.createArrayOf("VARCHAR", tool.category.toTypedArray()))
-                statement.executeUpdate()
-            }
-            tool.id
-        }
-    }
 }
