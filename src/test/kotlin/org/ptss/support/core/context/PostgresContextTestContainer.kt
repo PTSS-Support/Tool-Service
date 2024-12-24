@@ -15,16 +15,10 @@ class PostgresContextTestContainer : QuarkusTestResourceLifecycleManager {
 
         postgresContainer.start()
 
-        // Create schema after container starts
-        postgresContainer.createConnection("").use { connection ->
-            connection.createStatement().execute("CREATE SCHEMA IF NOT EXISTS tool_service")
-        }
-
         return mapOf(
             "quarkus.datasource.jdbc.url" to postgresContainer.jdbcUrl,
             "quarkus.datasource.username" to postgresContainer.username,
-            "quarkus.datasource.password" to postgresContainer.password,
-            "quarkus.hibernate-orm.database.default-schema" to "tool_service"
+            "quarkus.datasource.password" to postgresContainer.password
         )
     }
 
