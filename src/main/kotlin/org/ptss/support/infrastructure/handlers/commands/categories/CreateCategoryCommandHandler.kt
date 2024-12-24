@@ -28,8 +28,7 @@ class CreateCategoryCommandHandler(
                         createdAt = Instant.now(),
                         tools = emptyList()
                     )
-                    val createdCategory = categoryRepository.create(category)
-                    // Return the created category
+                    categoryRepository.create(category)
                     category
                 },
                 logMessage = "Error creating category with name: ${command.category}"
