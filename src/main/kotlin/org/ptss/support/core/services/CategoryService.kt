@@ -9,9 +9,7 @@ import org.ptss.support.domain.commands.categories.UpdateCategoryCommand
 import org.ptss.support.domain.enums.ErrorCode
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
 import org.ptss.support.domain.models.Category
-import org.ptss.support.domain.models.Comment
 import org.ptss.support.domain.queries.categories.GetAllCategoriesQuery
-import org.ptss.support.domain.queries.comments.GetAllCommentsQuery
 import org.ptss.support.infrastructure.handlers.queries.categories.GetAllCategoriesQueryHandler
 import org.ptss.support.infrastructure.util.executeWithExceptionLoggingAsync
 import org.slf4j.LoggerFactory
