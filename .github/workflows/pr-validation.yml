@@ -60,23 +60,6 @@ jobs:
     needs: build-and-analyze
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:15-alpine # Using Alpine for smaller footprint
-        env:
-          POSTGRES_DB: test_database
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: secret
-          POSTGRES_HOST_AUTH_METHOD: trust
-        ports:
-          - 5432:5432
-        # Add health check to ensure database is ready
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -94,10 +77,4 @@ jobs:
         run: chmod +x mvnw
 
       - name: Run Tests
-        env:
-          POSTGRESQL_DB_HOST: localhost
-          POSTGRESQL_DB_NAME: test_database
-          POSTGRESQL_DB_SCHEMA: tool_service
-          POSTGRESQL_DB_USERNAME: postgres
-          POSTGRESQL_DB_PASSWORD: secret
         run: ./mvnw test
