@@ -9,11 +9,12 @@ import org.ptss.support.core.context.PostgresContextTestContainer
 @QuarkusTest
 @QuarkusTestResource(PostgresContextTestContainer::class)
 class PostgresExampleTest {
+
     @Test
-    fun `test database operation`() {
-        // Your test here using RestAssured
+    fun `should retrieve all tools`() {
         given()
-            .`when`().get("/your-endpoint")
+            .`when`()
+            .get("/tools")
             .then()
             .statusCode(200)
     }
