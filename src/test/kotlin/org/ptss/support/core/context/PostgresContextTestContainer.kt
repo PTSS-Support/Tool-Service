@@ -12,13 +12,15 @@ class PostgresContextTestContainer : QuarkusTestResourceLifecycleManager {
             .withDatabaseName("test_database")
             .withUsername("test")
             .withPassword("test")
+            .withCommand("postgres -c 'create schema if not exists tool_service'")
 
         postgresContainer.start()
 
         return mapOf(
             "quarkus.datasource.jdbc.url" to postgresContainer.jdbcUrl,
             "quarkus.datasource.username" to postgresContainer.username,
-            "quarkus.datasource.password" to postgresContainer.password
+            "quarkus.datasource.password" to postgresContainer.password,
+            "quarkus.hibernate-orm.database.default-schema" to "tool_service"
         )
     }
 
