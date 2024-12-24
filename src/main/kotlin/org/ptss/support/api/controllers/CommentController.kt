@@ -14,7 +14,7 @@ import org.ptss.support.security.Authentication
 
 @Path("/tools/{toolId}/comments")
 @ApplicationScoped
-//@Authentication(roles = [Role.PATIENT, Role.FAMILY_MEMBER, Role.HCP])
+@Authentication(roles = [Role.PATIENT, Role.FAMILY_MEMBER, Role.HCP])
 class CommentController(
     private val commentFacade: CommentFacade
 ) : ICommentController {

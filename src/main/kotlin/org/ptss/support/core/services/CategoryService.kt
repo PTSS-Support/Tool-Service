@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import org.ptss.support.common.exceptions.APIException
 import org.ptss.support.domain.commands.categories.CreateCategoryCommand
+import org.ptss.support.domain.commands.categories.DeleteCategoryCommand
 import org.ptss.support.domain.commands.categories.UpdateCategoryCommand
 import org.ptss.support.domain.enums.ErrorCode
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
@@ -20,6 +21,7 @@ class CategoryService @Inject constructor(
     private val getAllCategoriesHandler: GetAllCategoriesQueryHandler,
     private val createCategoryHandler: ICommandHandler<CreateCategoryCommand, Category>,
     private val updateCategoryHandler: ICommandHandler<UpdateCategoryCommand, Category>,
+    private val deleteCategoryHandler: ICommandHandler<DeleteCategoryCommand, Unit>
 ) {
     private val logger = LoggerFactory.getLogger(CategoryService::class.java)
 
@@ -32,6 +34,44 @@ class CategoryService @Inject constructor(
                     errorCode = ErrorCode.CATEGORY_CREATION_ERROR,
                     message = "Unable to retrieve categories",
                 )
+            }
+        )
+    }
+
+    suspend fun createCategoryAsync(command: CreateCategoryCommand): Category {
+        validateCategoryCommand(command)
+        return logger.executeWithExceptionLoggingAsync(
+            operation = { createCategoryHandler.handleAsync(command) },
+            logMessage = "Error creating category ${command.category}",
+            exceptionHandling = { ex ->
+                APIException(
+                    errorCode = ErrorCode.CATEGORY_CREATION_ERROR,
+                    message = "Failed to create category ${command.category}",
+                )
+            }
+        )
+    }
+
+    suspend fun deleteCategoryAsync(categoryName: String) {
+        logger.executeWithExceptionLoggingAsync(
+            operation = {
+                getAllCategoriesAsync().find { it.category == categoryName }
+                    ?: throw APIException(
+                        errorCode = ErrorCode.CATEGORY_NOT_FOUND,
+                        message = "Category $categoryName not found"
+                    )
+
+                deleteCategoryHandler.handleAsync(DeleteCategoryCommand(categoryName))
+            },
+            logMessage = "Error deleting category $categoryName",
+            exceptionHandling = { ex ->
+                when (ex) {
+                    is APIException -> ex
+                    else -> APIException(
+                        errorCode = ErrorCode.CATEGORY_DELETION_ERROR,
+                        message = "Unable to delete category: $categoryName",
+                    )
+                }
             }
         )
     }
@@ -50,20 +90,6 @@ class CategoryService @Inject constructor(
                         message = "Failed to update category $oldCategory",
                     )
                 }
-            }
-        )
-    }
-
-    suspend fun createCategoryAsync(command: CreateCategoryCommand): Category {
-        validateCategoryCommand(command)
-        return logger.executeWithExceptionLoggingAsync(
-            operation = { createCategoryHandler.handleAsync(command) },
-            logMessage = "Error creating category ${command.category}",
-            exceptionHandling = { ex ->
-                APIException(
-                    errorCode = ErrorCode.CATEGORY_CREATION_ERROR,
-                    message = "Failed to create category ${command.category}",
-                )
             }
         )
     }

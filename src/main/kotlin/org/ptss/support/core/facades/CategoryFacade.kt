@@ -22,6 +22,10 @@ class CategoryFacade @Inject constructor(
         return CategoryMapper.toResponse(category)
     }
 
+    suspend fun deleteCategory(categoryName: String) {
+        categoryService.deleteCategoryAsync(categoryName)
+    }
+
     suspend fun updateCategory(categoryName: String, request: UpdateCategoryRequest): CategoryResponse {
         val command = UpdateCategoryCommand(categoryName, request.category)
         val updatedCategory = categoryService.updateCategoryAsync(categoryName, command)

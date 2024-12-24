@@ -55,7 +55,8 @@ enum class ErrorCode(
 
     // Category errors
     CATEGORY_UPDATE_ERROR("CATEGORY_UPDATE_ERROR", 400, "Failed to update category"),
-    CATEGORY_CREATION_ERROR("CATEGORY_CREATION_ERROR", 400, "Failed to create comment");
+    CATEGORY_CREATION_ERROR("CATEGORY_CREATION_ERROR", 400, "Failed to create comment"),
+    CATEGORY_DELETION_ERROR("CATEGORY_DELETION_ERROR", 400, "Failed to delete category");
 
     companion object {
         fun fromCode(code: String): ErrorCode? = values().find { it.code == code }

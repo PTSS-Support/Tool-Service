@@ -31,21 +31,24 @@ class CategoryRepository @Inject constructor(
     }
 
     @Transactional
-    override suspend fun update(oldCategory: String, newCategory: String): Category? {
-        // Step 1: Validate and fetch the existing category
-        val existingCategory = findCategoryByName(oldCategory) ?: return null
+    override suspend fun delete(categoryName: String): Category? {
+        val category = findCategoryByName(categoryName) ?: return null
 
-        // Step 2: Ensure the new category exists or insert it
-        ensureCategoryExists(newCategory, existingCategory.groupId, existingCategory.createdAt)
+        // Remove tool associations first
+        entityManager.createNativeQuery(
+            "DELETE FROM category_tools WHERE category = :category"
+        )
+            .setParameter("category", categoryName)
+            .executeUpdate()
 
-        // Step 3: Update references in the join table
-        updateCategoryTools(oldCategory, newCategory)
+        // Delete the category
+        entityManager.createNativeQuery(
+            "DELETE FROM categories WHERE category = :category"
+        )
+            .setParameter("category", categoryName)
+            .executeUpdate()
 
-        // Step 4: Remove the old category
-        deleteCategoryByName(oldCategory)
-
-        // Step 5: Return the updated category
-        return findCategoryByName(newCategory)?.toDomain()
+        return category.toDomain()
     }
 
     @Transactional
@@ -70,6 +73,24 @@ class CategoryRepository @Inject constructor(
         entityManager.persist(categoryEntity)
         entityManager.flush()
         return categoryEntity.category
+    }
+
+    @Transactional
+    override suspend fun update(oldCategory: String, newCategory: String): Category? {
+        // Step 1: Validate and fetch the existing category
+        val existingCategory = findCategoryByName(oldCategory) ?: return null
+
+        // Step 2: Ensure the new category exists or insert it
+        ensureCategoryExists(newCategory, existingCategory.groupId, existingCategory.createdAt)
+
+        // Step 3: Update references in the join table
+        updateCategoryTools(oldCategory, newCategory)
+
+        // Step 4: Remove the old category
+        deleteCategoryByName(oldCategory)
+
+        // Step 5: Return the updated category
+        return findCategoryByName(newCategory)?.toDomain()
     }
 
     private fun findCategoryByName(categoryName: String): CategoryEntity? {
