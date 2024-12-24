@@ -1,5 +1,6 @@
-package org.ptss.support.api.dtos.responses
+package org.ptss.support.api.dtos.responses.tools
 
+import org.ptss.support.api.dtos.responses.media.MediaInfoResponse
 import java.time.Instant
 
 data class ToolResponse(
@@ -8,5 +9,5 @@ data class ToolResponse(
     val description: String,
     val createdBy: String,
     val createdAt: Instant,
-    //val media: List<MediaInfoResponse>
+    val media: List<MediaInfoResponse>
 )

@@ -31,7 +31,13 @@ enum class ErrorCode(
     // Product errors
     PRODUCT_NOT_FOUND("PRODUCT_NOT_FOUND", 404, "The requested product was not found"),
     PRODUCT_VALIDATION_ERROR("PRODUCT_VALIDATION_ERROR", 400, "Product data validation failed"),
-    PRODUCT_CREATION_ERROR("PRODUCT_CREATION_ERROR", 400, "Failed to create product");
+    PRODUCT_CREATION_ERROR("PRODUCT_CREATION_ERROR", 400, "Failed to create product"),
+
+    // Tool errors
+    TOOL_NOT_FOUND("TOOL_NOT_FOUND", 404, "The requested tool was not found"),
+    TOOL_VALIDATION_ERROR("TOOL_VALIDATION_ERROR", 400, "tool data validation failed"),
+    TOOL_CREATION_ERROR("TOOL_CREATION_ERROR", 400, "Failed to create tool"),
+    TOOL_DELETION_ERROR("TOOL_DELETION_ERROR", 400, "Failed to delete tool");
 
     companion object {
         fun fromCode(code: String): ErrorCode? = values().find { it.code == code }
