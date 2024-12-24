@@ -59,6 +59,24 @@ jobs:
   test:
     needs: build-and-analyze
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine # Using Alpine for smaller footprint
+        env:
+          POSTGRES_DB: test_database
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: secret
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        # Add health check to ensure database is ready
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -75,13 +93,11 @@ jobs:
       - name: Grant execute permission for mvnw
         run: chmod +x mvnw
 
-      - name: Set Up In-Memory Database
-        run: |
-          echo "quarkus.datasource.db-kind=h2" >> src/main/resources/application.properties
-          echo "quarkus.datasource.jdbc.url=jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE" >> src/main/resources/application.properties
-          echo "quarkus.datasource.username=sa" >> src/main/resources/application.properties
-          echo "quarkus.datasource.password=" >> src/main/resources/application.properties
-          echo "quarkus.hibernate-orm.database.generation=drop-and-create" >> src/main/resources/application.properties
-        
       - name: Run Tests
+        env:
+          POSTGRESQL_DB_HOST: localhost
+          POSTGRESQL_DB_NAME: test_database
+          POSTGRESQL_DB_SCHEMA: tool_service
+          POSTGRESQL_DB_USERNAME: postgres
+          POSTGRESQL_DB_PASSWORD: secret
         run: ./mvnw test
