@@ -3,6 +3,7 @@ package org.ptss.support.infrastructure.persistence.entities
 import jakarta.persistence.*
 import org.ptss.support.domain.models.Category
 import java.time.Instant
+import java.util.UUID
 
 @Entity
 @Table(name = "categories")
@@ -12,12 +13,12 @@ class CategoryEntity {
     lateinit var category: String // Primary key
 
     @Column(name = "group_id", nullable = false, columnDefinition = "UUID")
-    lateinit var groupId: String
+    lateinit var groupId: UUID
 
     @Column(name = "created_at", nullable = false)
     lateinit var createdAt: Instant
 
-    @ManyToMany(targetEntity = ToolEntity::class)
+    @ManyToMany(targetEntity = ToolEntity::class, cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH])
     @JoinTable(
         name = "category_tools",
         joinColumns = [JoinColumn(name = "category", referencedColumnName = "category")],
@@ -27,7 +28,7 @@ class CategoryEntity {
 
     constructor()
 
-    constructor(category: String, groupId: String, createdAt: Instant, tools: List<ToolEntity>) {
+    constructor(category: String, groupId: UUID, createdAt: Instant, tools: List<ToolEntity>) {
         this.category = category
         this.groupId = groupId
         this.createdAt = createdAt
@@ -36,17 +37,17 @@ class CategoryEntity {
 
     fun toDomain() = Category(
         category = category,
-        groupId = groupId,
+        groupId = groupId.toString(),
         createdAt = createdAt,
         tools = tools.map { it.toDomain() }
     )
 
     companion object {
-        /*fun fromDomain(domain: Category) = CategoryEntity(
+        fun fromDomain(domain: Category, tools: List<ToolEntity> = emptyList()) = CategoryEntity(
             category = domain.category,
-            groupId = domain.groupId,
+            groupId = UUID.fromString(domain.groupId),
             createdAt = domain.createdAt,
-            tools = domain.tools.map { ToolEntity.fromDomain(it) }
-        )*/
+            tools = tools
+        )
     }
 }

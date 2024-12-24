@@ -26,6 +26,9 @@ enum class ErrorCode(
     // Tool errors
     TOOL_NOT_FOUND("TOOL_NOT_FOUND", 404, "The requested tool was not found"),
 
+    // Category errors
+    CATEGORY_NOT_FOUND("CATEGORY_NOT_FOUND", 404, "The requested category was not found"),
+
     // Comment errors
     COMMENT_NOT_FOUND("COMMENT_NOT_FOUND", 404, "The requested comment was not found"),
 
@@ -51,6 +54,7 @@ enum class ErrorCode(
     COMMENT_DELETION_ERROR("COMMENT_DELETION_ERROR", 400, "Failed to delete comment"),
 
     // Category errors
+    CATEGORY_UPDATE_ERROR("CATEGORY_UPDATE_ERROR", 400, "Failed to update category"),
     CATEGORY_CREATION_ERROR("CATEGORY_CREATION_ERROR", 400, "Failed to create comment");
 
     companion object {
