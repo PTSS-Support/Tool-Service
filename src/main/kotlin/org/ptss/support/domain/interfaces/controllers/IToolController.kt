@@ -7,6 +7,8 @@ import jakarta.ws.rs.POST
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.Produces
 import jakarta.ws.rs.Consumes
+import jakarta.ws.rs.QueryParam
+import jakarta.ws.rs.DefaultValue
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import org.eclipse.microprofile.openapi.annotations.Operation
@@ -16,6 +18,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse
 import org.ptss.support.api.dtos.requests.tools.CreateToolRequest
+import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
 import org.ptss.support.api.dtos.responses.tools.ToolResponse
 import org.ptss.support.common.exceptions.ServiceError
 
@@ -23,12 +26,12 @@ import org.ptss.support.common.exceptions.ServiceError
 @Consumes(MediaType.APPLICATION_JSON)
 interface IToolController {
     @GET
-    @Operation(summary = "Get all tools", description = "Retrieves a list of all tools")
+    @Operation(summary = "Get paginated list of tools")
     @APIResponses(
         APIResponse(
             responseCode = "200",
-            description = "List of tools successfully retrieved",
-            content = [Content(schema = Schema(implementation = Array<ToolResponse>::class))]
+            description = "Successfully retrieved tools",
+            content = [Content(schema = Schema(implementation = PaginationResponse::class))]
         ),
         APIResponse(
             responseCode = "400",
@@ -48,7 +51,16 @@ interface IToolController {
             content = [Content(schema = Schema(implementation = ServiceError::class))]
         )
     )
-    suspend fun getAllTools(): List<ToolResponse>
+    suspend fun getAllTools(
+        @Parameter(description = "Cursor for pagination")
+        @QueryParam("cursor") cursor: String?,
+
+        @Parameter(description = "Number of items per page (1-50)")
+        @QueryParam("pageSize") @DefaultValue("20") pageSize: Int,
+
+        @Parameter(description = "Sort order by creation time (asc/desc)")
+        @QueryParam("sortOrder") @DefaultValue("desc") sortOrder: String
+    ): PaginationResponse<ToolResponse>
 
     @GET
     @Path("/{id}")

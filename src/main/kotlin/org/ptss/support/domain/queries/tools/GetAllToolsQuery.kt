@@ -1,3 +1,7 @@
 package org.ptss.support.domain.queries.tools
 
-class GetAllToolsQuery()
+data class GetAllToolsQuery(
+    val cursor: String?,
+    val pageSize: Int,
+    val sortOrder: String
+)

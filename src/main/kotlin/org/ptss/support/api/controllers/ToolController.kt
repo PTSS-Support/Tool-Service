@@ -5,6 +5,7 @@ import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.core.Response
 import org.ptss.support.api.dtos.requests.tools.CreateToolRequest
+import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
 import org.ptss.support.api.dtos.responses.tools.ToolResponse
 import org.ptss.support.core.facades.ToolFacade
 import org.ptss.support.domain.enums.Role
@@ -13,13 +14,18 @@ import org.ptss.support.security.Authentication
 
 @Path("/tools")
 @ApplicationScoped
-@Authentication(roles = [Role.PATIENT, Role.FAMILY_MEMBER, Role.HCP])
+//@Authentication(roles = [Role.PATIENT, Role.FAMILY_MEMBER, Role.HCP])
 class ToolController(
     private val toolFacade: ToolFacade
     ) : IToolController {
 
-    override suspend fun getAllTools(): List<ToolResponse> =
-        toolFacade.getAllTools()
+    override suspend fun getAllTools(
+        cursor: String?,
+        pageSize: Int,
+        sortOrder: String
+    ): PaginationResponse<ToolResponse> {
+        return toolFacade.getAllTools(cursor, pageSize, sortOrder)
+    }
 
     override suspend fun getToolById(@PathParam("id") id: String): ToolResponse? =
         toolFacade.getToolById(id)

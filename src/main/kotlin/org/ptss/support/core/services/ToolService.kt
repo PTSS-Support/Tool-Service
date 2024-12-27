@@ -1,6 +1,7 @@
 package org.ptss.support.core.services
 
 import jakarta.enterprise.context.ApplicationScoped
+import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
 import org.ptss.support.common.exceptions.APIException
 import org.ptss.support.domain.commands.tools.CreateToolCommand
 import org.ptss.support.domain.commands.tools.DeleteToolCommand
@@ -45,10 +46,14 @@ class ToolService(
         )
     }
 
-    suspend fun getAllToolsAsync(): List<Tool> {
+    suspend fun getAllToolsAsync(cursor: String?, pageSize: Int, sortOrder: String): PaginationResponse<Tool> {
+        validatePagination(pageSize, sortOrder)
+
         return logger.executeWithExceptionLoggingAsync(
-            operation = { getAllToolsHandler.handleAsync(GetAllToolsQuery()) },
-            logMessage = "Error retrieving all tools",
+            operation = {
+                getAllToolsHandler.handleAsync(GetAllToolsQuery(cursor, pageSize, sortOrder))
+            },
+            logMessage = "Error retrieving tools",
             exceptionHandling = { ex ->
                 APIException(
                     errorCode = ErrorCode.TOOL_CREATION_ERROR,
@@ -100,5 +105,10 @@ class ToolService(
         require(command.name.isNotBlank()) { "Tool name cannot be empty" }
         require(command.description.isNotBlank()) { "Tool description cannot be empty" }
         require(command.category.isNotEmpty()) { "Tool must have at least one category" }
+    }
+
+    private fun validatePagination(pageSize: Int, sortOrder: String) {
+        require(pageSize in 1..50) { "Page size must be between 1 and 50" }
+        require(sortOrder in listOf("asc", "desc")) { "Sort order must be 'asc' or 'desc'" }
     }
 }

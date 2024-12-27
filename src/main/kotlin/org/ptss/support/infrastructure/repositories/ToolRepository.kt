@@ -5,9 +5,12 @@ import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
+import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
 import org.ptss.support.domain.interfaces.repositories.IToolRepository
 import org.ptss.support.domain.models.Tool
 import org.ptss.support.infrastructure.persistence.entities.ToolEntity
+import org.ptss.support.infrastructure.util.PaginationUtil
+import java.time.Instant
 import java.util.UUID
 
 @ApplicationScoped
@@ -16,11 +19,42 @@ class ToolRepository @Inject constructor(
 ) : IToolRepository, PanacheRepository<ToolEntity> {
 
     @Transactional
-    override suspend fun getAll(): List<Tool> {
-        return entityManager
-            .createQuery("SELECT t FROM ToolEntity t", ToolEntity::class.java)
-            .resultList
-            .map { it.toDomain() }
+    override suspend fun getAll(cursor: String?, pageSize: Int, sortOrder: String): PaginationResponse<Tool> {
+        val parsedCursor = cursor?.takeIf { it.isNotEmpty() }?.let { Instant.parse(it) }
+
+        // Count total items in the dataset
+        val totalItems = entityManager.createQuery("SELECT COUNT(t) FROM ToolEntity t", Long::class.java)
+            .singleResult
+            .toInt()
+
+        // Fetch items with pagination and cursor filtering
+        val tools = entityManager.createQuery(
+            """
+        SELECT t
+        FROM ToolEntity t
+        ${parsedCursor?.let { "WHERE t.createdAt ${if (sortOrder == "desc") "<" else ">"} :cursor" } ?: ""}
+        ORDER BY t.createdAt ${if (sortOrder == "desc") "DESC" else "ASC"}
+        """.trimIndent(), ToolEntity::class.java
+        ).apply {
+            parsedCursor?.let { setParameter("cursor", it) }
+            setMaxResults(pageSize + 1) // Fetch enough for the current page and one extra
+        }.resultList
+
+        // Use PaginationUtil to calculate pagination details
+        val (paginatedItems, nextCursor, totalPages) = PaginationUtil.calculatePaginationDetails(
+            items = tools,
+            pageSize = pageSize,
+            totalItems = totalItems
+        ) { it.createdAt.toString() }
+
+        // Return the response
+        return PaginationResponse(
+            data = paginatedItems.map { it.toDomain() },
+            nextCursor = nextCursor,
+            pageSize = paginatedItems.size,
+            totalItems = totalItems,
+            totalPages = totalPages
+        )
     }
 
     @Transactional
