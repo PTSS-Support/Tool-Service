@@ -7,6 +7,7 @@ import jakarta.ws.rs.core.Response
 import org.ptss.support.api.dtos.requests.comments.CreateCommentRequest
 import org.ptss.support.api.dtos.requests.comments.UpdateCommentRequest
 import org.ptss.support.api.dtos.responses.comments.CommentResponse
+import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
 import org.ptss.support.core.facades.CommentFacade
 import org.ptss.support.domain.enums.Role
 import org.ptss.support.domain.interfaces.controllers.ICommentController
@@ -19,8 +20,10 @@ class CommentController(
     private val commentFacade: CommentFacade
 ) : ICommentController {
 
-    override suspend fun getAllComments(@PathParam("toolId") toolId: String): List<CommentResponse> =
-        commentFacade.getAllComments(toolId)
+    override suspend fun getAllComments(@PathParam("toolId") toolId: String, cursor: String?, pageSize: Int, sortOrder: String
+    ): PaginationResponse<CommentResponse> =
+        commentFacade.getAllComments(toolId, cursor, pageSize, sortOrder)
+
 
     override suspend fun createComment(@PathParam("toolId") toolId: String, request: CreateCommentRequest): CommentResponse =
         commentFacade.createComment(toolId, request)

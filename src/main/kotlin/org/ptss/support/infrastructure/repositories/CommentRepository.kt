@@ -5,10 +5,13 @@ import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
+import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
 import org.ptss.support.domain.interfaces.repositories.ICommentRepository
 import org.ptss.support.domain.models.Comment
 import org.ptss.support.infrastructure.persistence.entities.CommentEntity
 import org.ptss.support.infrastructure.persistence.entities.ToolEntity
+import org.ptss.support.infrastructure.util.PaginationUtil
+import java.time.Instant
 import java.util.UUID
 
 @ApplicationScoped
@@ -17,19 +20,49 @@ class CommentRepository @Inject constructor(
 ) : ICommentRepository, PanacheRepository<CommentEntity> {
 
     @Transactional
-    override suspend fun getAll(toolId: String): List<Comment> {
+    override suspend fun getAll(toolId: String, cursor: String?, pageSize: Int, sortOrder: String): PaginationResponse<Comment> {
         val toolIdUUID = UUID.fromString(toolId)
-        return entityManager.createQuery(
-            """
-            SELECT c 
-            FROM CommentEntity c 
-            JOIN c.tool t 
-            WHERE t.id = :toolId
-            """, CommentEntity::class.java
+        val parsedCursor = cursor?.takeIf { it.isNotEmpty() }?.let { Instant.parse(it) }
+
+        // Count total items in the dataset
+        val totalItems = entityManager.createQuery(
+            "SELECT COUNT(c) FROM CommentEntity c JOIN c.tool t WHERE t.id = :toolId", Long::class.java
         )
             .setParameter("toolId", toolIdUUID)
-            .resultList
-            .map { it.toDomain() }
+            .singleResult
+            .toInt()
+
+        // Fetch items with pagination and cursor filtering
+        val comments = entityManager.createQuery(
+            """
+            SELECT c
+            FROM CommentEntity c
+            JOIN c.tool t
+            WHERE t.id = :toolId
+            ${parsedCursor?.let { "AND c.createdAt ${if (sortOrder == "desc") "<" else ">"} :cursor" } ?: ""}
+            ORDER BY c.createdAt ${if (sortOrder == "desc") "DESC" else "ASC"}
+            """.trimIndent(), CommentEntity::class.java
+        ).apply {
+            setParameter("toolId", toolIdUUID)
+            parsedCursor?.let { setParameter("cursor", it) }
+            setMaxResults(pageSize + 1) // Fetch enough for the current page and one extra
+        }.resultList
+
+        // Use PaginationUtil to calculate pagination details
+        val (paginatedItems, nextCursor, totalPages) = PaginationUtil.calculatePaginationDetails(
+            items = comments,
+            pageSize = pageSize,
+            totalItems = totalItems
+        ) { it.createdAt.toString() }
+
+        // Return the response
+        return PaginationResponse(
+            data = paginatedItems.map { it.toDomain() },
+            nextCursor = nextCursor,
+            pageSize = paginatedItems.size,
+            totalItems = totalItems,
+            totalPages = totalPages
+        )
     }
 
     @Transactional

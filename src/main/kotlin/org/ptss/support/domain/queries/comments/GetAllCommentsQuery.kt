@@ -1,5 +1,8 @@
 package org.ptss.support.domain.queries.comments
 
 data class GetAllCommentsQuery(
-    val toolId: String
+    val toolId: String,
+    val cursor: String?,
+    val pageSize: Int,
+    val sortOrder: String
 )

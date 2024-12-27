@@ -2,6 +2,7 @@ package org.ptss.support.core.services
 
 import jakarta.enterprise.context.ApplicationScoped
 import org.ptss.support.api.dtos.requests.comments.UpdateCommentRequest
+import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
 import org.ptss.support.common.exceptions.APIException
 import org.ptss.support.domain.commands.comments.CreateCommentCommand
 import org.ptss.support.domain.commands.comments.DeleteCommentCommand
@@ -23,9 +24,13 @@ class CommentService(
 ) {
     private val logger = LoggerFactory.getLogger(ToolService::class.java)
 
-    suspend fun getAllCommentsAsync(toolId: String): List<Comment> {
+    suspend fun getAllCommentsAsync(toolId: String, cursor: String?, pageSize: Int, sortOrder: String): PaginationResponse<Comment> {
+        validatePagination(pageSize, sortOrder)
+
         return logger.executeWithExceptionLoggingAsync(
-            operation = { getAllCommentsHandler.handleAsync(GetAllCommentsQuery(toolId)) },
+            operation = {
+                getAllCommentsHandler.handleAsync(GetAllCommentsQuery(toolId, cursor, pageSize, sortOrder))
+            },
             logMessage = "Error retrieving comments for tool $toolId",
             exceptionHandling = { ex ->
                 APIException(
@@ -120,6 +125,21 @@ class CommentService(
             throw APIException(
                 errorCode = ErrorCode.COMMENT_VALIDATION_ERROR,
                 message = validationErrors.joinToString("; ")
+            )
+        }
+    }
+
+    private fun validatePagination(pageSize: Int, sortOrder: String) {
+        if (pageSize !in 1..50) {
+            throw APIException(
+                errorCode = ErrorCode.VALIDATION_ERROR,
+                message = "Page size must be between 1 and 50"
+            )
+        }
+        if (sortOrder !in listOf("asc", "desc")) {
+            throw APIException(
+                errorCode = ErrorCode.VALIDATION_ERROR,
+                message = "Sort order must be 'asc' or 'desc'"
             )
         }
     }

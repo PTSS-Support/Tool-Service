@@ -18,7 +18,6 @@ class ToolFacade @Inject constructor(
         return PaginationMapper.mapPaginationResponse(result, ToolMapper::toResponse)
     }
 
-
     suspend fun getToolById(id: String): ToolResponse? =
         toolService.getToolByIdAsync(id)
             ?.let(ToolMapper::toResponse)

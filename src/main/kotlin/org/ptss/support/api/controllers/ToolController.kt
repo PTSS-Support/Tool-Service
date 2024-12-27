@@ -19,13 +19,9 @@ class ToolController(
     private val toolFacade: ToolFacade
     ) : IToolController {
 
-    override suspend fun getAllTools(
-        cursor: String?,
-        pageSize: Int,
-        sortOrder: String
-    ): PaginationResponse<ToolResponse> {
-        return toolFacade.getAllTools(cursor, pageSize, sortOrder)
-    }
+    override suspend fun getAllTools(cursor: String?, pageSize: Int, sortOrder: String
+    ): PaginationResponse<ToolResponse> =
+        toolFacade.getAllTools(cursor, pageSize, sortOrder)
 
     override suspend fun getToolById(@PathParam("id") id: String): ToolResponse? =
         toolFacade.getToolById(id)
@@ -37,5 +33,4 @@ class ToolController(
         toolFacade.deleteTool(id)
         return Response.noContent().build()
     }
-
 }

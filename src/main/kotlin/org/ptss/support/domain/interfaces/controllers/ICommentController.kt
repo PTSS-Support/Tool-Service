@@ -12,18 +12,19 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses
 import org.ptss.support.api.dtos.requests.comments.CreateCommentRequest
 import org.ptss.support.api.dtos.requests.comments.UpdateCommentRequest
 import org.ptss.support.api.dtos.responses.comments.CommentResponse
+import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
 import org.ptss.support.common.exceptions.ServiceError
 
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 interface ICommentController {
     @GET
-    @Operation(summary = "Get all comments", description = "Retrieves a list of all comments")
+    @Operation(summary = "Get all comments for a specific tool", description = "Retrieves a list of all comments associated with a tool")
     @APIResponses(
         APIResponse(
             responseCode = "200",
             description = "List of comments successfully retrieved",
-            content = [Content(schema = Schema(implementation = Array<CommentResponse>::class))]
+            content = [Content(schema = Schema(implementation = PaginationResponse::class))]
         ),
         APIResponse(
             responseCode = "400",
@@ -45,8 +46,17 @@ interface ICommentController {
     )
     suspend fun getAllComments(
         @Parameter(description = "Tool ID", required = true)
-        @PathParam("toolId") toolId: String
-    ): List<CommentResponse>
+        @PathParam("toolId") toolId: String,
+
+        @Parameter(description = "Cursor for pagination")
+        @QueryParam("cursor") cursor: String?,
+
+        @Parameter(description = "Number of items per page (1-50)")
+        @QueryParam("pageSize") @DefaultValue("20") pageSize: Int,
+
+        @Parameter(description = "Sort order by creation time (asc/desc)")
+        @QueryParam("sortOrder") @DefaultValue("desc") sortOrder: String
+    ): PaginationResponse<CommentResponse>
 
     @POST
     @Operation(summary = "Create comment", description = "Creates a new comment")
