@@ -108,7 +108,17 @@ class ToolService(
     }
 
     private fun validatePagination(pageSize: Int, sortOrder: String) {
-        require(pageSize in 1..50) { "Page size must be between 1 and 50" }
-        require(sortOrder in listOf("asc", "desc")) { "Sort order must be 'asc' or 'desc'" }
+        if (pageSize !in 1..50) {
+            throw APIException(
+                errorCode = ErrorCode.VALIDATION_ERROR,
+                message = "Page size must be between 1 and 50"
+            )
+        }
+        if (sortOrder !in listOf("asc", "desc")) {
+            throw APIException(
+                errorCode = ErrorCode.VALIDATION_ERROR,
+                message = "Sort order must be 'asc' or 'desc'"
+            )
+        }
     }
 }

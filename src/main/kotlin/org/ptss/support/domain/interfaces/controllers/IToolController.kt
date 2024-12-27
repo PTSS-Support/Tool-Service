@@ -35,7 +35,8 @@ interface IToolController {
         ),
         APIResponse(
             responseCode = "400",
-            description = "Invalid parameters"
+            description = "Invalid parameters",
+            content = [Content(schema = Schema(implementation = PaginationResponse::class))]
         ),
         APIResponse(
             responseCode = "401",
