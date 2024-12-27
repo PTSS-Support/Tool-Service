@@ -3,6 +3,7 @@ package org.ptss.support.core.services
 import jakarta.enterprise.context.ApplicationScoped
 import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
 import org.ptss.support.common.exceptions.APIException
+import org.ptss.support.core.util.ValidatePagination.validatePagination
 import org.ptss.support.domain.commands.tools.CreateToolCommand
 import org.ptss.support.domain.commands.tools.DeleteToolCommand
 import org.ptss.support.domain.enums.ErrorCode
@@ -105,20 +106,5 @@ class ToolService(
         require(command.name.isNotBlank()) { "Tool name cannot be empty" }
         require(command.description.isNotBlank()) { "Tool description cannot be empty" }
         require(command.category.isNotEmpty()) { "Tool must have at least one category" }
-    }
-
-    private fun validatePagination(pageSize: Int, sortOrder: String) {
-        if (pageSize !in 1..50) {
-            throw APIException(
-                errorCode = ErrorCode.VALIDATION_ERROR,
-                message = "Page size must be between 1 and 50"
-            )
-        }
-        if (sortOrder !in listOf("asc", "desc")) {
-            throw APIException(
-                errorCode = ErrorCode.VALIDATION_ERROR,
-                message = "Sort order must be 'asc' or 'desc'"
-            )
-        }
     }
 }

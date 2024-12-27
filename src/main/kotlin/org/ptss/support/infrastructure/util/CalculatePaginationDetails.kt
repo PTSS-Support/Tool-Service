@@ -1,6 +1,6 @@
 package org.ptss.support.infrastructure.util
 
-object PaginationUtil {
+object CalculatePaginationDetails {
     fun <T> calculatePaginationDetails(
         items: List<T>,
         pageSize: Int,

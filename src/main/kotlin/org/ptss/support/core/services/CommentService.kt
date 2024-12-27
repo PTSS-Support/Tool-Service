@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped
 import org.ptss.support.api.dtos.requests.comments.UpdateCommentRequest
 import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
 import org.ptss.support.common.exceptions.APIException
+import org.ptss.support.core.util.ValidatePagination.validatePagination
 import org.ptss.support.domain.commands.comments.CreateCommentCommand
 import org.ptss.support.domain.commands.comments.DeleteCommentCommand
 import org.ptss.support.domain.commands.comments.UpdateCommentCommand
@@ -125,21 +126,6 @@ class CommentService(
             throw APIException(
                 errorCode = ErrorCode.COMMENT_VALIDATION_ERROR,
                 message = validationErrors.joinToString("; ")
-            )
-        }
-    }
-
-    private fun validatePagination(pageSize: Int, sortOrder: String) {
-        if (pageSize !in 1..50) {
-            throw APIException(
-                errorCode = ErrorCode.VALIDATION_ERROR,
-                message = "Page size must be between 1 and 50"
-            )
-        }
-        if (sortOrder !in listOf("asc", "desc")) {
-            throw APIException(
-                errorCode = ErrorCode.VALIDATION_ERROR,
-                message = "Sort order must be 'asc' or 'desc'"
             )
         }
     }

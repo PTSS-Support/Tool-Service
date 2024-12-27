@@ -10,7 +10,7 @@ import org.ptss.support.domain.interfaces.repositories.ICommentRepository
 import org.ptss.support.domain.models.Comment
 import org.ptss.support.infrastructure.persistence.entities.CommentEntity
 import org.ptss.support.infrastructure.persistence.entities.ToolEntity
-import org.ptss.support.infrastructure.util.PaginationUtil
+import org.ptss.support.infrastructure.util.CalculatePaginationDetails
 import java.time.Instant
 import java.util.UUID
 
@@ -49,7 +49,7 @@ class CommentRepository @Inject constructor(
         }.resultList
 
         // Use PaginationUtil to calculate pagination details
-        val (paginatedItems, nextCursor, totalPages) = PaginationUtil.calculatePaginationDetails(
+        val (paginatedItems, nextCursor, totalPages) = CalculatePaginationDetails.calculatePaginationDetails(
             items = comments,
             pageSize = pageSize,
             totalItems = totalItems
