@@ -20,7 +20,6 @@ class CommentFacade @Inject constructor(
         return PaginationMapper.mapPaginationResponse(result, CommentMapper::toResponse)
     }
 
-
     suspend fun createComment(toolId: String, request: CreateCommentRequest): CommentResponse {
         val comment = commentService.createCommentAsync(CommentMapper.toCommand(toolId, request))
         return CommentMapper.toResponse(comment)

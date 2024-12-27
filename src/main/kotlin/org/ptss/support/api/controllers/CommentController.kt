@@ -24,7 +24,6 @@ class CommentController(
     ): PaginationResponse<CommentResponse> =
         commentFacade.getAllComments(toolId, cursor, pageSize, sortOrder)
 
-
     override suspend fun createComment(@PathParam("toolId") toolId: String, request: CreateCommentRequest): CommentResponse =
         commentFacade.createComment(toolId, request)
 
