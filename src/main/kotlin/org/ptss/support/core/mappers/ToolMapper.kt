@@ -17,7 +17,7 @@ object ToolMapper {
             MediaInfoResponse(
                 id = mediaInfo.id,
                 url = mediaInfo.url,
-                type = mediaInfo.type
+                href = mediaInfo.href
             )
         }
     )

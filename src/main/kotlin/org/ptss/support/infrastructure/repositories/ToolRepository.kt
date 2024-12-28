@@ -18,7 +18,7 @@ class ToolRepository @Inject constructor(
     @Transactional
     override suspend fun getAll(): List<Tool> {
         return entityManager
-            .createQuery("SELECT t FROM ToolEntity t", ToolEntity::class.java)
+            .createQuery("SELECT DISTINCT t FROM ToolEntity t LEFT JOIN FETCH t.mediaItems", ToolEntity::class.java)
             .resultList
             .map { it.toDomain() }
     }
