@@ -29,7 +29,7 @@ class CategoryService @Inject constructor(
             logMessage = "Error retrieving all categories",
             exceptionHandling = { ex ->
                 APIException(
-                    errorCode = ErrorCode.CATEGORY_CREATION_ERROR,
+                    errorCode = ErrorCode.CATEGORY_NOT_FOUND,
                     message = "Unable to retrieve categories",
                 )
             }
