@@ -5,17 +5,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.ptss.support.common.exceptions.APIException
 import org.ptss.support.domain.commands.categories.UpdateCategoryCommand
-import org.ptss.support.domain.commands.comments.UpdateCommentCommand
 import org.ptss.support.domain.enums.ErrorCode
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
-import org.ptss.support.domain.interfaces.repositories.ICategoryRepository
 import org.ptss.support.domain.models.Category
-import org.ptss.support.domain.models.Comment
-import org.ptss.support.infrastructure.repositories.CommentRepository
+import org.ptss.support.infrastructure.repositories.CategoryRepository
 
 @ApplicationScoped
 class UpdateCategoryCommandHandler(
-    private val categoryRepository: ICategoryRepository // Corrected this to use ICategoryRepository
+    private val categoryRepository: CategoryRepository
 ) : ICommandHandler<UpdateCategoryCommand, Category> {
 
     override suspend fun handleAsync(command: UpdateCategoryCommand): Category {

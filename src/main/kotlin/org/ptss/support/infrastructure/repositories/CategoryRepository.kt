@@ -7,11 +7,9 @@ import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.ptss.support.domain.interfaces.repositories.ICategoryRepository
 import org.ptss.support.domain.models.Category
-import org.ptss.support.domain.models.Comment
 import org.ptss.support.infrastructure.persistence.entities.CategoryEntity
 import org.ptss.support.infrastructure.persistence.entities.ToolEntity
-import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 @ApplicationScoped
 class CategoryRepository @Inject constructor(
@@ -77,21 +75,29 @@ class CategoryRepository @Inject constructor(
 
     @Transactional
     override suspend fun update(oldCategory: String, newCategory: String): Category? {
-        // Step 1: Validate and fetch the existing category
+        // Step 1: Fetch the existing category
         val existingCategory = findCategoryByName(oldCategory) ?: return null
 
-        // Step 2: Ensure the new category exists or insert it
-        ensureCategoryExists(newCategory, existingCategory.groupId, existingCategory.createdAt)
+        // Step 2: Detach the entity from the persistence context
+        entityManager.detach(existingCategory)
 
-        // Step 3: Update references in the join table
-        updateCategoryTools(oldCategory, newCategory)
+        // Step 3: Perform the update in the database
+        entityManager.createNativeQuery(
+            "UPDATE categories SET category = :newCategory WHERE category = :oldCategory"
+        )
+            .setParameter("newCategory", newCategory)
+            .setParameter("oldCategory", oldCategory)
+            .executeUpdate()
 
-        // Step 4: Remove the old category
-        deleteCategoryByName(oldCategory)
+        // Step 4: Update the detached entity
+        existingCategory.category = newCategory
 
-        // Step 5: Return the updated category
-        return findCategoryByName(newCategory)?.toDomain()
+        // Step 5: Merge the updated entity back into the persistence context
+        val mergedEntity = entityManager.merge(existingCategory)
+
+        return mergedEntity.toDomain()
     }
+
 
     private fun findCategoryByName(categoryName: String): CategoryEntity? {
         return entityManager.createQuery(
@@ -100,41 +106,5 @@ class CategoryRepository @Inject constructor(
             .setParameter("category", categoryName)
             .resultList
             .firstOrNull()
-    }
-
-    private fun ensureCategoryExists(category: String, groupId: UUID, createdAt: Instant) {
-        val exists = entityManager.createQuery(
-            "SELECT 1 FROM CategoryEntity c WHERE c.category = :category"
-        )
-            .setParameter("category", category)
-            .resultList
-            .isNotEmpty()
-
-        if (!exists) {
-            entityManager.createNativeQuery(
-                "INSERT INTO categories (category, group_id, created_at) VALUES (:category, :groupId, :createdAt)"
-            )
-                .setParameter("category", category)
-                .setParameter("groupId", groupId)
-                .setParameter("createdAt", createdAt)
-                .executeUpdate()
-        }
-    }
-
-    private fun updateCategoryTools(oldCategory: String, newCategory: String) {
-        entityManager.createNativeQuery(
-            "UPDATE category_tools SET category = :newCategory WHERE category = :oldCategory"
-        )
-            .setParameter("newCategory", newCategory)
-            .setParameter("oldCategory", oldCategory)
-            .executeUpdate()
-    }
-
-    private fun deleteCategoryByName(category: String) {
-        entityManager.createNativeQuery(
-            "DELETE FROM categories WHERE category = :category"
-        )
-            .setParameter("category", category)
-            .executeUpdate()
     }
 }

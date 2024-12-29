@@ -3,7 +3,7 @@ package org.ptss.support.infrastructure.persistence.entities
 import jakarta.persistence.*
 import org.ptss.support.domain.models.Category
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "categories")
@@ -18,11 +18,21 @@ class CategoryEntity {
     @Column(name = "created_at", nullable = false)
     lateinit var createdAt: Instant
 
-    @ManyToMany(targetEntity = ToolEntity::class, cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH])
+    @ManyToMany(targetEntity = ToolEntity::class)
     @JoinTable(
         name = "category_tools",
-        joinColumns = [JoinColumn(name = "category", referencedColumnName = "category")],
-        inverseJoinColumns = [JoinColumn(name = "tool_id", referencedColumnName = "id")]
+        joinColumns = [
+            JoinColumn(
+                name = "category",
+                referencedColumnName = "category",
+                foreignKey = ForeignKey(
+                    foreignKeyDefinition = "FOREIGN KEY (category) REFERENCES categories(category) ON UPDATE CASCADE"
+                )
+            )
+        ],
+        inverseJoinColumns = [
+            JoinColumn(name = "tool_id", referencedColumnName = "id")
+        ]
     )
     var tools: List<ToolEntity> = emptyList()
 
