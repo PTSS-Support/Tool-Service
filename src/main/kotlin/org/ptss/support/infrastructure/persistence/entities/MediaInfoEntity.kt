@@ -42,7 +42,7 @@ class MediaInfoEntity {
 
     companion object {
         fun fromDomain(mediaInfo: MediaInfo, tool: ToolEntity) = MediaInfoEntity(
-            id = if (mediaInfo.id.isNotBlank()) UUID.fromString(mediaInfo.id) else null,
+            id = null,
             tool = tool,
             url = mediaInfo.url,
             href = mediaInfo.href // Updated

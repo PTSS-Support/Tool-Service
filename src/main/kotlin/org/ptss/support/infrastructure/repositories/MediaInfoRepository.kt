@@ -10,7 +10,7 @@ import org.ptss.support.domain.interfaces.repositories.IMediaInfoRepository
 import org.ptss.support.domain.models.MediaInfo
 import org.ptss.support.infrastructure.persistence.entities.MediaInfoEntity
 import org.ptss.support.infrastructure.persistence.entities.ToolEntity
-import java.util.*
+import java.util.UUID
 
 @ApplicationScoped
 class MediaInfoRepository @Inject constructor(
@@ -26,10 +26,14 @@ class MediaInfoRepository @Inject constructor(
             .resultList
             .firstOrNull() ?: throw NotFoundException("Tool not found with id: ${mediaInfo.toolId}")
 
+        // Create new entity without ID
         val mediaEntity = MediaInfoEntity.fromDomain(mediaInfo, tool)
+
+        // Persist and flush
         entityManager.persist(mediaEntity)
         entityManager.flush()
 
+        // Return domain model with generated ID
         return mediaEntity.toDomain()
     }
 }
