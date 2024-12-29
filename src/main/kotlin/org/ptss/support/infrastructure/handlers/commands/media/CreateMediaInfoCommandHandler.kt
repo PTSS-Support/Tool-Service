@@ -7,15 +7,15 @@ import kotlinx.coroutines.withContext
 import org.ptss.support.core.services.AzureBlobStorageService
 import org.ptss.support.domain.commands.media.CreateMediaInfoCommand
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
-import org.ptss.support.domain.interfaces.repositories.IMediaInfoRepository
 import org.ptss.support.domain.models.MediaInfo
+import org.ptss.support.infrastructure.repositories.MediaInfoRepository
 import org.ptss.support.infrastructure.util.executeWithExceptionLoggingAsync
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 @ApplicationScoped
 class CreateMediaInfoCommandHandler(
-    private val mediaInfoRepository: IMediaInfoRepository,
+    private val mediaInfoRepository: MediaInfoRepository,
     private val blobStorageService: AzureBlobStorageService
 ) : ICommandHandler<CreateMediaInfoCommand, MediaInfo> {
     private val logger = LoggerFactory.getLogger(CreateMediaInfoCommandHandler::class.java)
