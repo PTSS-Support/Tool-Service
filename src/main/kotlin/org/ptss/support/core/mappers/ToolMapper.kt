@@ -1,9 +1,8 @@
 package org.ptss.support.core.mappers
 
 import org.ptss.support.api.dtos.requests.tools.CreateToolRequest
-import org.ptss.support.api.dtos.responses.media.MediaInfoResponse
-import org.ptss.support.domain.commands.tools.CreateToolCommand
 import org.ptss.support.api.dtos.responses.tools.ToolResponse
+import org.ptss.support.domain.commands.tools.CreateToolCommand
 import org.ptss.support.domain.models.Tool
 
 object ToolMapper {
@@ -13,13 +12,7 @@ object ToolMapper {
         description = tool.description,
         createdBy = tool.createdBy,
         createdAt = tool.createdAt,
-        media = tool.media.map { mediaInfo ->
-            MediaInfoResponse(
-                id = mediaInfo.id,
-                url = mediaInfo.url,
-                href = mediaInfo.href
-            )
-        }
+        media = tool.media?.let { MediaInfoMapper.toResponse(it) }
     )
 
     fun toCommand(request: CreateToolRequest) = CreateToolCommand(

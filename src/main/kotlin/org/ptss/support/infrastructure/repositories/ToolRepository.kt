@@ -8,7 +8,7 @@ import jakarta.transaction.Transactional
 import org.ptss.support.domain.interfaces.repositories.IToolRepository
 import org.ptss.support.domain.models.Tool
 import org.ptss.support.infrastructure.persistence.entities.ToolEntity
-import java.util.UUID
+import java.util.*
 
 @ApplicationScoped
 class ToolRepository @Inject constructor(
@@ -18,7 +18,7 @@ class ToolRepository @Inject constructor(
     @Transactional
     override suspend fun getAll(): List<Tool> {
         return entityManager
-            .createQuery("SELECT DISTINCT t FROM ToolEntity t LEFT JOIN FETCH t.mediaItems", ToolEntity::class.java)
+            .createQuery("SELECT DISTINCT t FROM ToolEntity t LEFT JOIN FETCH t.mediaItem", ToolEntity::class.java)
             .resultList
             .map { it.toDomain() }
     }

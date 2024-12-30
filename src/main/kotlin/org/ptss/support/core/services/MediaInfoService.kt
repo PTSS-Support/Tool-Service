@@ -17,16 +17,6 @@ class MediaInfoService(
 
     private val maxFileSize = 10L * 1024 * 1024 // 10MB
 
-    private suspend fun validateMediaCommand(command: CreateMediaInfoCommand) {
-        requireNotNull(command.fileData) { "File data cannot be null" }
-
-        // Validate file size
-        val fileSize = command.fileData.available().toLong()
-        require(fileSize <= maxFileSize) {
-            "File size exceeds maximum allowed size of ${maxFileSize / (1024 * 1024)}MB"
-        }
-    }
-
     suspend fun createMediaInfoAsync(command: CreateMediaInfoCommand): MediaInfo {
         validateMediaCommand(command)
         return logger.executeWithExceptionLoggingAsync(
@@ -39,5 +29,15 @@ class MediaInfoService(
                 )
             }
         )
+    }
+
+    private suspend fun validateMediaCommand(command: CreateMediaInfoCommand) {
+        requireNotNull(command.fileData) { "File data cannot be null" }
+
+        // Validate file size
+        val fileSize = command.fileData.available().toLong()
+        require(fileSize <= maxFileSize) {
+            "File size exceeds maximum allowed size of ${maxFileSize / (1024 * 1024)}MB"
+        }
     }
 }

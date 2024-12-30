@@ -3,7 +3,7 @@ package org.ptss.support.infrastructure.persistence.entities
 import jakarta.persistence.*
 import org.ptss.support.domain.models.Tool
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "tools")
@@ -29,8 +29,8 @@ class ToolEntity {
     @Column(name = "created_at", nullable = false)
     var createdAt: Instant = Instant.now()
 
-    @OneToMany(mappedBy = "tool", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var mediaItems: MutableList<MediaInfoEntity> = mutableListOf()
+    @OneToOne(mappedBy = "tool", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var mediaItem: MediaInfoEntity? = null // Single object, nullable
 
     // No-arg constructor for JPA
     constructor()
@@ -59,7 +59,7 @@ class ToolEntity {
         category = category,
         createdBy = createdBy,
         createdAt = createdAt,
-        media = mediaItems.map { it.toDomain() }
+        media = mediaItem?.toDomain() // Nullable mapping
     )
 
     companion object {
