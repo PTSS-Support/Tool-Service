@@ -10,7 +10,7 @@ import org.ptss.support.domain.interfaces.repositories.IMediaInfoRepository
 import org.ptss.support.domain.models.MediaInfo
 import org.ptss.support.infrastructure.persistence.entities.MediaInfoEntity
 import org.ptss.support.infrastructure.persistence.entities.ToolEntity
-import java.util.UUID
+import java.util.*
 
 @ApplicationScoped
 class MediaInfoRepository @Inject constructor(
@@ -34,6 +34,23 @@ class MediaInfoRepository @Inject constructor(
         entityManager.flush()
 
         // Return domain model with generated ID
+        return mediaEntity.toDomain()
+    }
+
+    @Transactional
+    override suspend fun delete(toolId: String, mediaId: String): MediaInfo? {
+        val mediaEntity = entityManager
+            .createQuery(
+                "SELECT m FROM MediaInfoEntity m WHERE m.id = :id AND m.tool.id = :toolId",
+                MediaInfoEntity::class.java
+            )
+            .setParameter("id", UUID.fromString(mediaId))
+            .setParameter("toolId", UUID.fromString(toolId))
+            .resultList
+            .firstOrNull()
+            ?: return null
+
+        entityManager.remove(mediaEntity)
         return mediaEntity.toDomain()
     }
 }

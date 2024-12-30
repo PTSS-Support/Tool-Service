@@ -29,6 +29,9 @@ enum class ErrorCode(
     // Comment errors
     COMMENT_NOT_FOUND("COMMENT_NOT_FOUND", 404, "The requested comment was not found"),
 
+    // Media error
+    MEDIA_NOT_FOUND("MEDIA_NOT_FOUND", 404, "The requested media file was not found"),
+
     INTERNAL_ERROR("INTERNAL_ERROR", 500, "An unexpected system error occurred"),
     RATE_LIMIT_EXCEEDED("RATE_LIMIT_EXCEEDED", 429, "Too many requests"),
     SERVICE_UNAVAILABLE("SERVICE_UNAVAILABLE", 503, "Service temporarily unavailable"),
@@ -51,7 +54,8 @@ enum class ErrorCode(
     COMMENT_DELETION_ERROR("COMMENT_DELETION_ERROR", 400, "Failed to delete comment"),
 
     //Media errors
-    MEDIA_CREATION_ERROR("MEDIA_CREATION_ERROR", 400, "Failed to upload media");
+    MEDIA_CREATION_ERROR("MEDIA_CREATION_ERROR", 400, "Failed to upload media"),
+    MEDIA_DELETION_ERROR("MEDIA_DELETION_ERROR", 400, "Failed to delete media");
 
     companion object {
         fun fromCode(code: String): ErrorCode? = values().find { it.code == code }

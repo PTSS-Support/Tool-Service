@@ -3,6 +3,7 @@ package org.ptss.support.core.services
 import jakarta.enterprise.context.ApplicationScoped
 import org.ptss.support.common.exceptions.APIException
 import org.ptss.support.domain.commands.media.CreateMediaInfoCommand
+import org.ptss.support.domain.commands.media.DeleteMediaInfoCommand
 import org.ptss.support.domain.enums.ErrorCode
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
 import org.ptss.support.domain.models.MediaInfo
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory
 @ApplicationScoped
 class MediaInfoService(
     private val createMediaHandler: ICommandHandler<CreateMediaInfoCommand, MediaInfo>,
+    private val deleteMediaInfoHandler : ICommandHandler<DeleteMediaInfoCommand, Unit>
 ) {
     private val logger = LoggerFactory.getLogger(MediaInfoService::class.java)
 
@@ -27,6 +29,24 @@ class MediaInfoService(
                     errorCode = ErrorCode.MEDIA_CREATION_ERROR,
                     message = "Failed to upload media for tool ${command.toolId}",
                 )
+            }
+        )
+    }
+
+    suspend fun deleteMediaInfoAsync(toolId: String, mediaId: String) {
+        logger.executeWithExceptionLoggingAsync(
+            operation = {
+                deleteMediaInfoHandler.handleAsync(DeleteMediaInfoCommand(toolId, mediaId))
+            },
+            logMessage = "Error deleting media $mediaId for tool $toolId",
+            exceptionHandling = { ex ->
+                when (ex) {
+                    is APIException -> ex
+                    else -> APIException(
+                        errorCode = ErrorCode.MEDIA_DELETION_ERROR,
+                        message = "Unable to delete media with ID $mediaId for tool $toolId",
+                    )
+                }
             }
         )
     }

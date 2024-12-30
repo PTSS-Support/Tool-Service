@@ -3,6 +3,7 @@ package org.ptss.support.api.controllers
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.PathParam
+import jakarta.ws.rs.core.Response
 import org.jboss.resteasy.reactive.RestForm
 import org.ptss.support.api.dtos.requests.media.CreateMediaInfoRequest
 import org.ptss.support.api.dtos.responses.media.MediaInfoResponse
@@ -23,4 +24,9 @@ class MediaInfoController(
         @RestForm("media") media: InputStream,
         @RestForm("href") href: String?
     ): MediaInfoResponse = mediaInfoFacade.createMediaInfo(toolId, CreateMediaInfoRequest(media, href))
+
+    override suspend fun deleteMediaInfo(@PathParam("toolId") toolId: String, @PathParam("mediaId") mediaId: String): Response {
+        mediaInfoFacade.deleteMediaInfo(toolId, mediaId)
+        return Response.noContent().build()
+    }
 }

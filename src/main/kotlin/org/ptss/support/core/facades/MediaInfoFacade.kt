@@ -15,4 +15,7 @@ class MediaInfoFacade @Inject constructor(
         val media = mediaInfoService.createMediaInfoAsync(MediaInfoMapper.toCommand(toolId, request))
         return MediaInfoMapper.toResponse(media)
     }
+
+    suspend fun deleteMediaInfo(toolId: String, mediaId: String) =
+        mediaInfoService.deleteMediaInfoAsync(toolId, mediaId)
 }
