@@ -5,6 +5,7 @@ import org.ptss.support.domain.models.MediaInfo
 import java.util.*
 
 @Entity
+@Table(name = "mediainfo")
 class MediaInfoEntity {
     @Id
     @GeneratedValue
@@ -14,19 +15,16 @@ class MediaInfoEntity {
     @Column(name = "url", nullable = false, columnDefinition = "TEXT")
     lateinit var url: String
 
-    @Column(name = "href", nullable = true, columnDefinition = "TEXT") // Updated
+    @Column(name = "href", nullable = true, columnDefinition = "TEXT")
     var href: String? = null
 
-    // Many-to-one relationship with ToolEntity
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tool_id", nullable = false)
     lateinit var tool: ToolEntity
-
-    // No-arg constructor for JPA
+    
     constructor()
 
-    // Constructor for creating the entity
-    constructor(id: UUID?, tool: ToolEntity, url: String, href: String?) { // Updated
+    constructor(id: UUID?, tool: ToolEntity, url: String, href: String?) {
         this.id = id
         this.tool = tool
         this.url = url
@@ -37,7 +35,7 @@ class MediaInfoEntity {
         id = id.toString(),
         toolId = tool.id.toString(),
         url = url,
-        href = href // Updated
+        href = href
     )
 
     companion object {
@@ -45,7 +43,7 @@ class MediaInfoEntity {
             id = null,
             tool = tool,
             url = mediaInfo.url,
-            href = mediaInfo.href // Updated
+            href = mediaInfo.href
         )
     }
 }
