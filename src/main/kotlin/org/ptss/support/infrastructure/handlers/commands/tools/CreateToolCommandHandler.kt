@@ -12,7 +12,7 @@ import org.ptss.support.infrastructure.repositories.ToolRepository
 import org.ptss.support.infrastructure.util.executeWithExceptionLoggingAsync
 import org.slf4j.LoggerFactory
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 @ApplicationScoped
 class CreateToolCommandHandler(
@@ -33,7 +33,7 @@ class CreateToolCommandHandler(
                         createdAt = Instant.now()
                     )
                     val createdId = toolRepository.create(tool)
-                    // Fetch the created tool to return complete object
+
                     toolRepository.getById(createdId) ?: throw APIException(
                         errorCode = ErrorCode.TOOL_CREATION_ERROR,
                         message = "Tool created but couldn't be retrieved"

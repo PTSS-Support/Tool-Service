@@ -53,4 +53,17 @@ class MediaInfoRepository @Inject constructor(
         entityManager.remove(mediaEntity)
         return mediaEntity.toDomain()
     }
+
+    @Transactional
+    override suspend fun hasExistingMedia(toolId: String): Boolean {
+        val count = entityManager
+            .createQuery(
+                "SELECT COUNT(m) FROM MediaInfoEntity m WHERE m.tool.id = :toolId",
+                Long::class.java
+            )
+            .setParameter("toolId", UUID.fromString(toolId))
+            .singleResult
+
+        return count > 0
+    }
 }
