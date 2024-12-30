@@ -1,8 +1,15 @@
 package org.ptss.support.infrastructure.persistence.entities
 
-import jakarta.persistence.*
+import jakarta.persistence.Entity
+import jakarta.persistence.Table
+import jakarta.persistence.Id
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.Column
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.FetchType
 import org.ptss.support.domain.models.MediaInfo
-import java.util.*
+import java.util.UUID
 
 @Entity
 @Table(name = "mediainfo")
@@ -21,7 +28,7 @@ class MediaInfoEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tool_id", nullable = false)
     lateinit var tool: ToolEntity
-    
+
     constructor()
 
     constructor(id: UUID?, tool: ToolEntity, url: String, href: String?) {
