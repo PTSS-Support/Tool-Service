@@ -5,7 +5,7 @@ import jakarta.ws.rs.BadRequestException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.ptss.support.common.exceptions.APIException
-import org.ptss.support.core.services.AzureBlobStorageService
+import org.ptss.support.core.services.BlobStorageService
 import org.ptss.support.domain.commands.media.CreateMediaInfoCommand
 import org.ptss.support.domain.enums.ErrorCode
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
@@ -18,7 +18,7 @@ import java.util.*
 @ApplicationScoped
 class CreateMediaInfoCommandHandler(
     private val mediaInfoRepository: MediaInfoRepository,
-    private val blobStorageService: AzureBlobStorageService
+    private val blobStorageService: BlobStorageService
 ) : ICommandHandler<CreateMediaInfoCommand, MediaInfo> {
     private val logger = LoggerFactory.getLogger(CreateMediaInfoCommandHandler::class.java)
 
@@ -37,8 +37,7 @@ class CreateMediaInfoCommandHandler(
                         )
                     }
 
-                    val fileName = "${UUID.randomUUID()}-${System.currentTimeMillis()}"
-                    val url = blobStorageService.uploadFile(command.fileData, fileName)
+                    val url = blobStorageService.uploadFileToBlobAsync(command.fileData)
                     val mediaInfo = MediaInfo(
                         id = UUID.randomUUID().toString(),
                         toolId = command.toolId,
@@ -53,3 +52,4 @@ class CreateMediaInfoCommandHandler(
         }
     }
 }
+

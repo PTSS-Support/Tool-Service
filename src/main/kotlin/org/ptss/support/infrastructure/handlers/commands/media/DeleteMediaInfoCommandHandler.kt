@@ -4,7 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.ptss.support.common.exceptions.APIException
-import org.ptss.support.core.services.AzureBlobStorageService
+import org.ptss.support.core.services.BlobStorageService
 import org.ptss.support.domain.commands.media.DeleteMediaInfoCommand
 import org.ptss.support.domain.enums.ErrorCode
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 @ApplicationScoped
 class DeleteMediaInfoCommandHandler(
     private val mediaInfoRepository: MediaInfoRepository,
-    private val blobStorageService: AzureBlobStorageService
+    private val blobStorageService: BlobStorageService
 ) : ICommandHandler<DeleteMediaInfoCommand, Unit> {
 
     private val logger = LoggerFactory.getLogger(DeleteMediaInfoCommandHandler::class.java)
@@ -33,7 +33,7 @@ class DeleteMediaInfoCommandHandler(
 
                     // Extract blob name from the URL and delete the blob
                     val blobName = extractBlobName(mediaUrl.url)
-                    blobStorageService.deleteFile(blobName)
+                    blobStorageService.deleteFileFromBlobAsync(blobName)
                 },
                 logMessage = "Error deleting media ${command.id} for tool ${command.toolId}"
             )
