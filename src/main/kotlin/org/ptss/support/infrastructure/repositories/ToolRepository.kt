@@ -38,18 +38,15 @@ class ToolRepository @Inject constructor(
     @Transactional
     override suspend fun delete(id: String): Tool? {
         val toolId = UUID.fromString(id)
-        val toolEntity = entityManager
-            .createQuery("SELECT t FROM ToolEntity t WHERE t.id = :id", ToolEntity::class.java)
-            .setParameter("id", toolId)
-            .resultList
-            .firstOrNull()
+        val toolEntity = find("id", toolId).firstResult() ?: return null
 
-        return if (toolEntity != null) {
-            entityManager.remove(toolEntity)
-            toolEntity.toDomain()
-        } else {
-            null
+        // Clear tool references from categories first
+        toolEntity.categories.forEach { category ->
+            category.tools = category.tools.filter { it.id != toolEntity.id }
         }
+
+        delete("id", toolId)
+        return toolEntity.toDomain()
     }
 
     @Transactional
