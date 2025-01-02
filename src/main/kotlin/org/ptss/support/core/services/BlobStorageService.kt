@@ -1,15 +1,12 @@
 package org.ptss.support.core.services
 
 
-import com.azure.storage.blob.BlobContainerClient
-import com.azure.storage.blob.BlobServiceClient
-import com.azure.storage.blob.BlobServiceClientBuilder
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import org.apache.tika.Tika
 import org.ptss.support.common.exceptions.APIException
 import org.ptss.support.domain.enums.ErrorCode
-import org.ptss.support.infrastructure.config.AzureStorageConfig
+import org.ptss.support.infrastructure.repositories.BlobStorageRepository
 import org.ptss.support.infrastructure.util.executeWithExceptionLoggingAsync
 import org.slf4j.LoggerFactory
 import java.io.InputStream
@@ -18,16 +15,8 @@ import java.util.*
 
 @ApplicationScoped
 class BlobStorageService @Inject constructor(
-    private val azureStorageConfig: AzureStorageConfig
+    private val blobStorageRepository: BlobStorageRepository
 ) {
-    private val blobServiceClient: BlobServiceClient = BlobServiceClientBuilder()
-        .connectionString(azureStorageConfig.connectionString())
-        .buildClient()
-
-    private val containerClient: BlobContainerClient = blobServiceClient
-        .getBlobContainerClient(azureStorageConfig.containerName())
-        .apply { if (!exists()) create() }
-
     private val logger = LoggerFactory.getLogger(BlobStorageService::class.java)
     private val tika = Tika()
 
@@ -38,7 +27,7 @@ class BlobStorageService @Inject constructor(
                 operation = {
                     val fileType = detectFileType(bufferedStream)
                     val fileName = generateFileName(fileType)
-                    uploadToBlobStorage(bufferedStream, fileName)
+                    blobStorageRepository.uploadFileToBlobStorage(bufferedStream, fileName)
                 },
                 logMessage = "Error uploading file to Azure Blob Storage",
                 exceptionHandling = {
@@ -54,14 +43,7 @@ class BlobStorageService @Inject constructor(
     suspend fun deleteFileFromBlobAsync(blobName: String) {
         logger.executeWithExceptionLoggingAsync(
             operation = {
-                val blobClient = containerClient.getBlobClient(blobName)
-                if (!blobClient.exists()) {
-                    throw APIException(
-                        errorCode = ErrorCode.MEDIA_DELETION_ERROR,
-                        message = "Blob $blobName not found for deletion"
-                    )
-                }
-                blobClient.delete()
+                blobStorageRepository.deleteFileFromBlob(blobName)
             },
             logMessage = "Error deleting blob $blobName",
             exceptionHandling = {
@@ -98,12 +80,6 @@ class BlobStorageService @Inject constructor(
 
     private fun generateFileName(fileType: String): String {
         return "${UUID.randomUUID()}$fileType"
-    }
-
-    private suspend fun uploadToBlobStorage(fileStream: InputStream, fileName: String): String {
-        val blobClient = containerClient.getBlobClient(fileName)
-        blobClient.upload(fileStream, true)
-        return blobClient.blobUrl
     }
 }
 
