@@ -6,9 +6,11 @@ import jakarta.persistence.Id
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Column
 import jakarta.persistence.ManyToMany
+import jakarta.persistence.OneToOne
+import jakarta.persistence.CascadeType
 import org.ptss.support.domain.models.Tool
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 @Entity
 @Table(name = "tools")
@@ -38,7 +40,7 @@ class ToolEntity {
     var createdAt: Instant = Instant.now()
 
     @OneToOne(mappedBy = "tool", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var mediaItem: MediaInfoEntity? = null // Single object, nullable
+    var mediaItem: MediaInfoEntity? = null
 
     // No-arg constructor for JPA
     constructor()

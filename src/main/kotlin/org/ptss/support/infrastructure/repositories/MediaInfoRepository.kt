@@ -5,7 +5,6 @@ import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
-import jakarta.ws.rs.NotFoundException
 import org.ptss.support.domain.interfaces.repositories.IMediaInfoRepository
 import org.ptss.support.domain.models.MediaInfo
 import org.ptss.support.infrastructure.persistence.entities.MediaInfoEntity
@@ -20,50 +19,29 @@ class MediaInfoRepository @Inject constructor(
     @Transactional
     override suspend fun create(mediaInfo: MediaInfo): MediaInfo {
         val toolId = UUID.fromString(mediaInfo.toolId)
-        val tool = entityManager
-            .createQuery("SELECT t FROM ToolEntity t WHERE t.id = :id", ToolEntity::class.java)
-            .setParameter("id", toolId)
-            .resultList
-            .firstOrNull() ?: throw NotFoundException("Tool not found with id: ${mediaInfo.toolId}")
+        val tool = entityManager.find(ToolEntity::class.java, toolId)
 
-        // Create new entity without ID
         val mediaEntity = MediaInfoEntity.fromDomain(mediaInfo, tool)
 
-        // Persist and flush
-        entityManager.persist(mediaEntity)
-        entityManager.flush()
+        persist(mediaEntity)
 
-        // Return domain model with generated ID
         return mediaEntity.toDomain()
     }
 
     @Transactional
     override suspend fun delete(toolId: String, mediaId: String): MediaInfo? {
-        val mediaEntity = entityManager
-            .createQuery(
-                "SELECT m FROM MediaInfoEntity m WHERE m.id = :id AND m.tool.id = :toolId",
-                MediaInfoEntity::class.java
-            )
-            .setParameter("id", UUID.fromString(mediaId))
-            .setParameter("toolId", UUID.fromString(toolId))
-            .resultList
-            .firstOrNull()
-            ?: return null
+        val mediaEntity = find("id = ?1 AND tool.id = ?2", UUID.fromString(mediaId), UUID.fromString(toolId))
+            .firstResult() ?: return null
 
-        entityManager.remove(mediaEntity)
+        mediaEntity.tool.mediaItem = null
+
+        delete(mediaEntity)
+
         return mediaEntity.toDomain()
     }
 
     @Transactional
     override suspend fun hasExistingMedia(toolId: String): Boolean {
-        val count = entityManager
-            .createQuery(
-                "SELECT COUNT(m) FROM MediaInfoEntity m WHERE m.tool.id = :toolId",
-                Long::class.java
-            )
-            .setParameter("toolId", UUID.fromString(toolId))
-            .singleResult
-
-        return count > 0
+        return count("tool.id = ?1", UUID.fromString(toolId)) > 0
     }
 }

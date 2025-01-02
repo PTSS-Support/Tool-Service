@@ -51,14 +51,14 @@ enum class ErrorCode(
     TOOL_DELETION_ERROR("TOOL_DELETION_ERROR", 400, "Failed to delete tool"),
 
     // Comment errors
-    COMMENT_UPDATE_ERROR("COMMENT_UPDATE_ERROR", 400, "Dailed to update comment"),
+    COMMENT_UPDATE_ERROR("COMMENT_UPDATE_ERROR", 400, "Failed to update comment"),
     COMMENT_VALIDATION_ERROR("COMMENT_VALIDATION_ERROR", 400, "Comment data validation failed"),
     COMMENT_CREATION_ERROR("COMMENT_CREATION_ERROR", 400, "Failed to create comment"),
     COMMENT_DELETION_ERROR("COMMENT_DELETION_ERROR", 400, "Failed to delete comment"),
 
     //Media errors
     MEDIA_CREATION_ERROR("MEDIA_CREATION_ERROR", 400, "Failed to upload media"),
-    MEDIA_DELETION_ERROR("MEDIA_DELETION_ERROR", 400, "Failed to delete media");
+    MEDIA_DELETION_ERROR("MEDIA_DELETION_ERROR", 400, "Failed to delete media"),
 
     // Category errors
     CATEGORY_UPDATE_ERROR("CATEGORY_UPDATE_ERROR", 400, "Failed to update category"),
