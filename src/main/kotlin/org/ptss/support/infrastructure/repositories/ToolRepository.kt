@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.ptss.support.domain.interfaces.repositories.IToolRepository
 import org.ptss.support.domain.models.Tool
+import org.ptss.support.infrastructure.persistence.entities.CategoryEntity
 import org.ptss.support.infrastructure.persistence.entities.ToolEntity
 import java.util.*
 
@@ -37,25 +38,32 @@ class ToolRepository @Inject constructor(
     @Transactional
     override suspend fun delete(id: String): Tool? {
         val toolId = UUID.fromString(id)
-        val toolEntity = entityManager
-            .createQuery("SELECT t FROM ToolEntity t WHERE t.id = :id", ToolEntity::class.java)
-            .setParameter("id", toolId)
-            .resultList
-            .firstOrNull()
+        val toolEntity = find("id", toolId).firstResult() ?: return null
 
-        return if (toolEntity != null) {
-            entityManager.remove(toolEntity)
-            toolEntity.toDomain()
-        } else {
-            null
+        // Clear tool references from categories first
+        toolEntity.categories.forEach { category ->
+            category.tools = category.tools.filter { it.id != toolEntity.id }
         }
+
+        delete("id", toolId)
+        return toolEntity.toDomain()
     }
 
     @Transactional
     override suspend fun create(tool: Tool): String {
-        val toolEntity = ToolEntity.fromDomain(tool)
+        val categoryEntities = tool.category.map { categoryName ->
+            entityManager.find(CategoryEntity::class.java, categoryName)
+        }
 
+        val toolEntity = ToolEntity.fromDomain(tool, categoryEntities)
         toolEntity.id = null
+
+        // Update bi-directional relationship
+        categoryEntities.forEach { category ->
+            if (!category.tools.contains(toolEntity)) {
+                category.tools = category.tools + toolEntity
+            }
+        }
 
         entityManager.persist(toolEntity)
         entityManager.flush()

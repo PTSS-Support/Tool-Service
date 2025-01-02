@@ -26,6 +26,7 @@ class CreateToolCommandHandler(
                 operation = {
                     val tool = Tool(
                         id = UUID.randomUUID().toString(),
+                        userId = command.userId,
                         name = command.name,
                         description = command.description,
                         category = command.category,
