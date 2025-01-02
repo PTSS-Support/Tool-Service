@@ -16,8 +16,11 @@ class ToolEntity {
 
     @Id
     @GeneratedValue
-    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "UUID")
+    @Column(name = "id", updatable = false, nullable = false)
     var id: UUID? = null
+
+    @Column(name = "user_id", nullable = false)
+    var userId: UUID? = null
 
     @Column(nullable = false, columnDefinition = "TEXT")
     var name: String = ""
@@ -38,6 +41,7 @@ class ToolEntity {
 
     constructor(
         id: UUID?,
+        userId: UUID?,
         name: String,
         description: String,
         categories: List<CategoryEntity>,
@@ -45,6 +49,7 @@ class ToolEntity {
         createdAt: Instant
     ) {
         this.id = id
+        this.userId = userId
         this.name = name
         this.description = description
         this.categories = categories
@@ -54,9 +59,10 @@ class ToolEntity {
 
     fun toDomain() = Tool(
         id = id.toString(),
+        userId = userId.toString(),
         name = name,
         description = description,
-        category = categories.map { it.category }, // Map category names
+        category = categories.map { it.category },
         createdBy = createdBy,
         createdAt = createdAt,
         media = emptyList()
@@ -65,6 +71,7 @@ class ToolEntity {
     companion object {
         fun fromDomain(tool: Tool, categories: List<CategoryEntity>) = ToolEntity(
             id = if (tool.id.isNotBlank()) UUID.fromString(tool.id) else null,
+            userId = UUID.fromString(tool.userId),
             name = tool.name,
             description = tool.description,
             categories = categories,

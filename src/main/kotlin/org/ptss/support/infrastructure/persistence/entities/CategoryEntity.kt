@@ -10,9 +10,9 @@ import java.util.*
 class CategoryEntity {
     @Id
     @Column(nullable = false, unique = true)
-    lateinit var category: String // Primary key
+    lateinit var category: String
 
-    @Column(name = "group_id", nullable = false, columnDefinition = "UUID")
+    @Column(name = "group_id", nullable = false)
     lateinit var groupId: UUID
 
     @Column(name = "created_at", nullable = false)

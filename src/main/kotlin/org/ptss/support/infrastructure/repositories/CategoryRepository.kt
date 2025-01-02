@@ -17,36 +17,22 @@ class CategoryRepository @Inject constructor(
 ) : ICategoryRepository, PanacheRepository<CategoryEntity> {
     @Transactional
     override suspend fun getAll(): List<Category> {
-        return entityManager.createQuery(
-            """
-            SELECT DISTINCT c 
-            FROM CategoryEntity c 
-            LEFT JOIN FETCH c.tools
-            """, CategoryEntity::class.java
-        )
-            .resultList
+        return find("FROM CategoryEntity c LEFT JOIN FETCH c.tools")
+            .list()
             .map { it.toDomain() }
     }
 
     @Transactional
     override suspend fun delete(categoryName: String): Category? {
-        val category = findCategoryByName(categoryName) ?: return null
+        val categoryEntity = find("category", categoryName).firstResult() ?: return null
 
-        // Remove tool associations first
-        entityManager.createNativeQuery(
-            "DELETE FROM category_tools WHERE category = :category"
-        )
-            .setParameter("category", categoryName)
-            .executeUpdate()
+        categoryEntity.tools.forEach { tool ->
+            tool.categories = tool.categories.filter { it.category != categoryEntity.category }
+        }
 
-        // Delete the category
-        entityManager.createNativeQuery(
-            "DELETE FROM categories WHERE category = :category"
-        )
-            .setParameter("category", categoryName)
-            .executeUpdate()
+        delete(categoryEntity)
 
-        return category.toDomain()
+        return categoryEntity.toDomain()
     }
 
     @Transactional
@@ -61,7 +47,6 @@ class CategoryRepository @Inject constructor(
 
         val categoryEntity = CategoryEntity.fromDomain(category, existingTools)
 
-        // Update bi-directional relationship if there are tools
         existingTools.forEach { tool ->
             if (!tool.categories.contains(categoryEntity)) {
                 tool.categories = tool.categories + categoryEntity
@@ -75,36 +60,7 @@ class CategoryRepository @Inject constructor(
 
     @Transactional
     override suspend fun update(oldCategory: String, newCategory: String): Category? {
-        // Step 1: Fetch the existing category
-        val existingCategory = findCategoryByName(oldCategory) ?: return null
-
-        // Step 2: Detach the entity from the persistence context
-        entityManager.detach(existingCategory)
-
-        // Step 3: Perform the update in the database
-        entityManager.createNativeQuery(
-            "UPDATE categories SET category = :newCategory WHERE category = :oldCategory"
-        )
-            .setParameter("newCategory", newCategory)
-            .setParameter("oldCategory", oldCategory)
-            .executeUpdate()
-
-        // Step 4: Update the detached entity
-        existingCategory.category = newCategory
-
-        // Step 5: Merge the updated entity back into the persistence context
-        val mergedEntity = entityManager.merge(existingCategory)
-
-        return mergedEntity.toDomain()
-    }
-
-
-    private fun findCategoryByName(categoryName: String): CategoryEntity? {
-        return entityManager.createQuery(
-            "SELECT c FROM CategoryEntity c WHERE c.category = :category", CategoryEntity::class.java
-        )
-            .setParameter("category", categoryName)
-            .resultList
-            .firstOrNull()
+        update("category = ?1 where category = ?2", newCategory, oldCategory)
+        return find("category", newCategory).firstResult()?.toDomain()
     }
 }
