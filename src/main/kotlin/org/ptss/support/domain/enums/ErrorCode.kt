@@ -26,6 +26,9 @@ enum class ErrorCode(
     // Tool errors
     TOOL_NOT_FOUND("TOOL_NOT_FOUND", 404, "The requested tool was not found"),
 
+    // Category errors
+    CATEGORY_NOT_FOUND("CATEGORY_NOT_FOUND", 404, "The requested category was not found"),
+
     // Comment errors
     COMMENT_NOT_FOUND("COMMENT_NOT_FOUND", 404, "The requested comment was not found"),
 
@@ -48,7 +51,12 @@ enum class ErrorCode(
     COMMENT_UPDATE_ERROR("COMMENT_UPDATE_ERROR", 400, "Dailed to update comment"),
     COMMENT_VALIDATION_ERROR("COMMENT_VALIDATION_ERROR", 400, "Comment data validation failed"),
     COMMENT_CREATION_ERROR("COMMENT_CREATION_ERROR", 400, "Failed to create comment"),
-    COMMENT_DELETION_ERROR("COMMENT_DELETION_ERROR", 400, "Failed to delete comment");
+    COMMENT_DELETION_ERROR("COMMENT_DELETION_ERROR", 400, "Failed to delete comment"),
+
+    // Category errors
+    CATEGORY_UPDATE_ERROR("CATEGORY_UPDATE_ERROR", 400, "Failed to update category"),
+    CATEGORY_CREATION_ERROR("CATEGORY_CREATION_ERROR", 400, "Failed to create comment"),
+    CATEGORY_DELETION_ERROR("CATEGORY_DELETION_ERROR", 400, "Failed to delete category");
 
     companion object {
         fun fromCode(code: String): ErrorCode? = values().find { it.code == code }
