@@ -1,6 +1,7 @@
 package org.ptss.support.infrastructure.repositories
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheRepository
+import io.quarkus.panache.common.Sort
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.persistence.EntityManager
@@ -23,30 +24,23 @@ class ToolRepository @Inject constructor(
     override suspend fun getAll(cursor: String?, pageSize: Int, sortOrder: String): PaginationResponse<Tool> {
         val parsedCursor = cursor?.takeIf { it.isNotEmpty() }?.let { Instant.parse(it) }
         val totalItems = count().toInt()
+        val sort = Sort.by("createdAt", if (sortOrder == "desc") Sort.Direction.Descending else Sort.Direction.Ascending)
 
-        val tools = find("FROM ToolEntity t LEFT JOIN FETCH t.mediaItem ${parsedCursor?.let
-                { "WHERE t.createdAt " + "${if (sortOrder == "desc") "<" else ">"} ?1" } ?: ""} "
-                + "ORDER BY t.createdAt ${if (sortOrder == "desc") "DESC" else "ASC"}",
-            *listOfNotNull(parsedCursor).toTypedArray())
-            .page(0, pageSize + 1)
-            .list()
+        val query = when {
+            parsedCursor != null -> find("createdAt ${if (sortOrder == "desc") "<" else ">"} ?1", sort, parsedCursor)
+            else -> findAll(sort)
+        }
 
-        return CalculatePaginationDetails.calculatePaginationDetails(tools, pageSize, totalItems) { it.createdAt.toString() }
-            .let { (items, nextCursor, totalPages) ->
-                PaginationResponse(items.map { it.toDomain() }, nextCursor, items.size, totalItems, totalPages)
-            }
+        val tools = query.page(0, pageSize + 1).list()
+
+        return CalculatePaginationDetails.calculatePaginationDetails(tools, pageSize, totalItems) { it.createdAt.toString() }.let { (items, nextCursor, totalPages) ->
+            PaginationResponse(items.map { it.toDomain() }, nextCursor, items.size, totalItems, totalPages)
+        }
     }
 
     @Transactional
-    override suspend fun getById(id: String): Tool? {
-        val toolId = UUID.fromString(id)
-        return entityManager
-            .createQuery("SELECT t FROM ToolEntity t WHERE t.id = :id", ToolEntity::class.java)
-            .setParameter("id", toolId)
-            .resultList
-            .firstOrNull()
-            ?.toDomain()
-    }
+    override suspend fun getById(id: String): Tool? =
+        find("id", UUID.fromString(id)).firstResult()?.toDomain()
 
     @Transactional
     override suspend fun delete(id: String): Tool? {

@@ -1,6 +1,7 @@
 package org.ptss.support.infrastructure.repositories
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheRepository
+import io.quarkus.panache.common.Sort
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.persistence.EntityManager
@@ -25,11 +26,13 @@ class CommentRepository @Inject constructor(
         val parsedCursor = cursor?.let(Instant::parse)
         val totalItems = count("tool.id", toolIdUUID).toInt()
 
-        val comments = find(
-            "tool.id = ?1 ${parsedCursor?.let { "AND createdAt ${if (sortOrder == "desc") "<" else ">"} ?2" } ?: ""} " +
-                    "ORDER BY createdAt ${if (sortOrder == "desc") "DESC" else "ASC"}",
-            *listOfNotNull(toolIdUUID, parsedCursor).toTypedArray()
-        ).page(0, pageSize + 1).list()
+        val sort = Sort.by("createdAt", if (sortOrder == "desc") Sort.Direction.Descending else Sort.Direction.Ascending)
+
+        val query = find("tool.id = ?1", sort, toolIdUUID)
+
+        val comments = query.list()
+            .filter { parsedCursor == null || (sortOrder == "desc" && it.createdAt < parsedCursor) || (sortOrder != "desc" && it.createdAt > parsedCursor) }
+            .take(pageSize + 1)
 
         return CalculatePaginationDetails.calculatePaginationDetails(comments, pageSize, totalItems) { it.createdAt.toString() }
             .let { (items, nextCursor, totalPages) ->
@@ -37,14 +40,13 @@ class CommentRepository @Inject constructor(
             }
     }
 
+
     @Transactional
     override suspend fun create(comment: Comment): String {
         val toolEntity = entityManager.find(ToolEntity::class.java, UUID.fromString(comment.toolId))
-            ?: throw IllegalArgumentException("Tool with ID ${comment.toolId} does not exist")
 
         val entity = CommentEntity.fromDomain(comment, toolEntity)
 
-        // Ensure the ID is null before persisting
         entity.id = null
 
         entityManager.persist(entity)
@@ -57,8 +59,9 @@ class CommentRepository @Inject constructor(
         val entity = findCommentByToolAndId(toolId, commentId) ?: return null
 
         entity.content = content
-        entity.lastEditedAt = java.time.Instant.now()
-        entityManager.merge(entity)
+        entity.lastEditedAt = Instant.now()
+
+        persist(entity)
 
         return entity.toDomain()
     }
@@ -76,17 +79,6 @@ class CommentRepository @Inject constructor(
         val toolIdUUID = UUID.fromString(toolId)
         val commentIdUUID = UUID.fromString(commentId)
 
-        return entityManager.createQuery(
-            """
-            SELECT c 
-            FROM CommentEntity c 
-            JOIN c.tool t 
-            WHERE t.id = :toolId AND c.id = :commentId
-            """, CommentEntity::class.java
-        )
-            .setParameter("toolId", toolIdUUID)
-            .setParameter("commentId", commentIdUUID)
-            .resultList
-            .firstOrNull()
+        return find("tool.id = ?1 and id = ?2", toolIdUUID, commentIdUUID).firstResult()
     }
 }
