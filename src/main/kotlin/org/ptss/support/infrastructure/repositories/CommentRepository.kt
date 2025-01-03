@@ -12,7 +12,7 @@ import org.ptss.support.infrastructure.persistence.entities.CommentEntity
 import org.ptss.support.infrastructure.persistence.entities.ToolEntity
 import org.ptss.support.infrastructure.util.CalculatePaginationDetails
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 @ApplicationScoped
 class CommentRepository @Inject constructor(
@@ -22,47 +22,19 @@ class CommentRepository @Inject constructor(
     @Transactional
     override suspend fun getAll(toolId: String, cursor: String?, pageSize: Int, sortOrder: String): PaginationResponse<Comment> {
         val toolIdUUID = UUID.fromString(toolId)
-        val parsedCursor = cursor?.takeIf { it.isNotEmpty() }?.let { Instant.parse(it) }
+        val parsedCursor = cursor?.let(Instant::parse)
+        val totalItems = count("tool.id", toolIdUUID).toInt()
 
-        // Count total items in the dataset
-        val totalItems = entityManager.createQuery(
-            "SELECT COUNT(c) FROM CommentEntity c JOIN c.tool t WHERE t.id = :toolId", Long::class.java
-        )
-            .setParameter("toolId", toolIdUUID)
-            .singleResult
-            .toInt()
+        val comments = find(
+            "tool.id = ?1 ${parsedCursor?.let { "AND createdAt ${if (sortOrder == "desc") "<" else ">"} ?2" } ?: ""} " +
+                    "ORDER BY createdAt ${if (sortOrder == "desc") "DESC" else "ASC"}",
+            *listOfNotNull(toolIdUUID, parsedCursor).toTypedArray()
+        ).page(0, pageSize + 1).list()
 
-        // Fetch items with pagination and cursor filtering
-        val comments = entityManager.createQuery(
-            """
-            SELECT c
-            FROM CommentEntity c
-            JOIN c.tool t
-            WHERE t.id = :toolId
-            ${parsedCursor?.let { "AND c.createdAt ${if (sortOrder == "desc") "<" else ">"} :cursor" } ?: ""}
-            ORDER BY c.createdAt ${if (sortOrder == "desc") "DESC" else "ASC"}
-            """.trimIndent(), CommentEntity::class.java
-        ).apply {
-            setParameter("toolId", toolIdUUID)
-            parsedCursor?.let { setParameter("cursor", it) }
-            setMaxResults(pageSize + 1) // Fetch enough for the current page and one extra
-        }.resultList
-
-        // Use PaginationUtil to calculate pagination details
-        val (paginatedItems, nextCursor, totalPages) = CalculatePaginationDetails.calculatePaginationDetails(
-            items = comments,
-            pageSize = pageSize,
-            totalItems = totalItems
-        ) { it.createdAt.toString() }
-
-        // Return the response
-        return PaginationResponse(
-            data = paginatedItems.map { it.toDomain() },
-            nextCursor = nextCursor,
-            pageSize = paginatedItems.size,
-            totalItems = totalItems,
-            totalPages = totalPages
-        )
+        return CalculatePaginationDetails.calculatePaginationDetails(comments, pageSize, totalItems) { it.createdAt.toString() }
+            .let { (items, nextCursor, totalPages) ->
+                PaginationResponse(items.map { it.toDomain() }, nextCursor, items.size, totalItems, totalPages)
+            }
     }
 
     @Transactional

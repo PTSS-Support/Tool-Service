@@ -10,10 +10,9 @@ import org.ptss.support.domain.interfaces.repositories.IToolRepository
 import org.ptss.support.domain.models.Tool
 import org.ptss.support.infrastructure.persistence.entities.CategoryEntity
 import org.ptss.support.infrastructure.persistence.entities.ToolEntity
-
 import org.ptss.support.infrastructure.util.CalculatePaginationDetails
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 @ApplicationScoped
 class ToolRepository @Inject constructor(
@@ -21,11 +20,20 @@ class ToolRepository @Inject constructor(
 ) : IToolRepository, PanacheRepository<ToolEntity> {
 
     @Transactional
-    override suspend fun getAll(): List<Tool> {
-        return entityManager
-            .createQuery("SELECT DISTINCT t FROM ToolEntity t LEFT JOIN FETCH t.mediaItem", ToolEntity::class.java)
-            .resultList
-            .map { it.toDomain() 
+    override suspend fun getAll(cursor: String?, pageSize: Int, sortOrder: String): PaginationResponse<Tool> {
+        val parsedCursor = cursor?.takeIf { it.isNotEmpty() }?.let { Instant.parse(it) }
+        val totalItems = count().toInt()
+
+        val tools = find("FROM ToolEntity t LEFT JOIN FETCH t.mediaItem ${parsedCursor?.let
+                { "WHERE t.createdAt " + "${if (sortOrder == "desc") "<" else ">"} ?1" } ?: ""} "
+                + "ORDER BY t.createdAt ${if (sortOrder == "desc") "DESC" else "ASC"}",
+            *listOfNotNull(parsedCursor).toTypedArray())
+            .page(0, pageSize + 1)
+            .list()
+
+        return CalculatePaginationDetails.calculatePaginationDetails(tools, pageSize, totalItems) { it.createdAt.toString() }
+            .let { (items, nextCursor, totalPages) ->
+                PaginationResponse(items.map { it.toDomain() }, nextCursor, items.size, totalItems, totalPages)
             }
     }
 
