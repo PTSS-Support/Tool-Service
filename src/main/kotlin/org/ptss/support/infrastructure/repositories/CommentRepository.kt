@@ -73,8 +73,7 @@ class CommentRepository @Inject constructor(
         entityManager.remove(entity)
         return entity.toDomain()
     }
-
-    // Helper function to find a comment by toolId and commentId
+    
     private fun findCommentByToolAndId(toolId: String, commentId: String): CommentEntity? {
         val toolIdUUID = UUID.fromString(toolId)
         val commentIdUUID = UUID.fromString(commentId)
