@@ -8,7 +8,9 @@ import jakarta.transaction.Transactional
 import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
 import org.ptss.support.domain.interfaces.repositories.IToolRepository
 import org.ptss.support.domain.models.Tool
+import org.ptss.support.infrastructure.persistence.entities.CategoryEntity
 import org.ptss.support.infrastructure.persistence.entities.ToolEntity
+
 import org.ptss.support.infrastructure.util.CalculatePaginationDetails
 import java.time.Instant
 import java.util.UUID
@@ -19,42 +21,12 @@ class ToolRepository @Inject constructor(
 ) : IToolRepository, PanacheRepository<ToolEntity> {
 
     @Transactional
-    override suspend fun getAll(cursor: String?, pageSize: Int, sortOrder: String): PaginationResponse<Tool> {
-        val parsedCursor = cursor?.takeIf { it.isNotEmpty() }?.let { Instant.parse(it) }
-
-        // Count total items in the dataset
-        val totalItems = entityManager.createQuery("SELECT COUNT(t) FROM ToolEntity t", Long::class.java)
-            .singleResult
-            .toInt()
-
-        // Fetch items with pagination and cursor filtering
-        val tools = entityManager.createQuery(
-            """
-        SELECT t
-        FROM ToolEntity t
-        ${parsedCursor?.let { "WHERE t.createdAt ${if (sortOrder == "desc") "<" else ">"} :cursor" } ?: ""}
-        ORDER BY t.createdAt ${if (sortOrder == "desc") "DESC" else "ASC"}
-        """.trimIndent(), ToolEntity::class.java
-        ).apply {
-            parsedCursor?.let { setParameter("cursor", it) }
-            setMaxResults(pageSize + 1) // Fetch enough for the current page and one extra
-        }.resultList
-
-        // Use PaginationUtil to calculate pagination details
-        val (paginatedItems, nextCursor, totalPages) = CalculatePaginationDetails.calculatePaginationDetails(
-            items = tools,
-            pageSize = pageSize,
-            totalItems = totalItems
-        ) { it.createdAt.toString() }
-
-        // Return the response
-        return PaginationResponse(
-            data = paginatedItems.map { it.toDomain() },
-            nextCursor = nextCursor,
-            pageSize = paginatedItems.size,
-            totalItems = totalItems,
-            totalPages = totalPages
-        )
+    override suspend fun getAll(): List<Tool> {
+        return entityManager
+            .createQuery("SELECT DISTINCT t FROM ToolEntity t LEFT JOIN FETCH t.mediaItem", ToolEntity::class.java)
+            .resultList
+            .map { it.toDomain() 
+            }
     }
 
     @Transactional
@@ -71,25 +43,32 @@ class ToolRepository @Inject constructor(
     @Transactional
     override suspend fun delete(id: String): Tool? {
         val toolId = UUID.fromString(id)
-        val toolEntity = entityManager
-            .createQuery("SELECT t FROM ToolEntity t WHERE t.id = :id", ToolEntity::class.java)
-            .setParameter("id", toolId)
-            .resultList
-            .firstOrNull()
+        val toolEntity = find("id", toolId).firstResult() ?: return null
 
-        return if (toolEntity != null) {
-            entityManager.remove(toolEntity)
-            toolEntity.toDomain()
-        } else {
-            null
+        // Clear tool references from categories first
+        toolEntity.categories.forEach { category ->
+            category.tools = category.tools.filter { it.id != toolEntity.id }
         }
+
+        delete("id", toolId)
+        return toolEntity.toDomain()
     }
 
     @Transactional
     override suspend fun create(tool: Tool): String {
-        val toolEntity = ToolEntity.fromDomain(tool)
+        val categoryEntities = tool.category.map { categoryName ->
+            entityManager.find(CategoryEntity::class.java, categoryName)
+        }
 
+        val toolEntity = ToolEntity.fromDomain(tool, categoryEntities)
         toolEntity.id = null
+
+        // Update bi-directional relationship
+        categoryEntities.forEach { category ->
+            if (!category.tools.contains(toolEntity)) {
+                category.tools = category.tools + toolEntity
+            }
+        }
 
         entityManager.persist(toolEntity)
         entityManager.flush()
