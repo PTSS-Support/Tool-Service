@@ -40,7 +40,6 @@ class CommentRepository @Inject constructor(
             }
     }
 
-
     @Transactional
     override suspend fun create(comment: Comment): String {
         val toolEntity = entityManager.find(ToolEntity::class.java, UUID.fromString(comment.toolId))
@@ -73,7 +72,7 @@ class CommentRepository @Inject constructor(
         entityManager.remove(entity)
         return entity.toDomain()
     }
-    
+
     private fun findCommentByToolAndId(toolId: String, commentId: String): CommentEntity? {
         val toolIdUUID = UUID.fromString(toolId)
         val commentIdUUID = UUID.fromString(commentId)
