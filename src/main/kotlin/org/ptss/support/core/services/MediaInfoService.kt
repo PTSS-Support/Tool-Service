@@ -51,12 +51,13 @@ class MediaInfoService(
     }
 
     private suspend fun validateMediaCommand(command: CreateMediaInfoCommand) {
-        requireNotNull(command.fileData) { "File data cannot be null" }
+        val fileSize = command.fileData?.available()?.toLong() ?: 0
 
-        // Validate file size
-        val fileSize = command.fileData.available().toLong()
-        require(fileSize <= FileConstants.MAX_FILE_SIZE) {
-            "File size exceeds maximum allowed size of ${FileConstants.MAX_FILE_SIZE / (1024 * 1024)}MB"
+        if (fileSize > FileConstants.MAX_FILE_SIZE) {
+            throw APIException(
+                errorCode = ErrorCode.FILE_SIZE_EXCEEDED,
+                message = "File size exceeds the maximum allowed size of ${FileConstants.MAX_FILE_SIZE / (1024 * 1024)}MB"
+            )
         }
     }
 }
