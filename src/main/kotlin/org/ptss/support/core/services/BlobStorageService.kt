@@ -3,7 +3,6 @@ package org.ptss.support.core.services
 
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
-import org.apache.tika.Tika
 import org.ptss.support.common.exceptions.APIException
 import org.ptss.support.domain.enums.ErrorCode
 import org.ptss.support.infrastructure.repositories.BlobStorageRepository
@@ -18,14 +17,13 @@ class BlobStorageService @Inject constructor(
     private val blobStorageRepository: BlobStorageRepository
 ) {
     private val logger = LoggerFactory.getLogger(BlobStorageService::class.java)
-    private val tika = Tika()
 
     suspend fun uploadFileToBlobAsync(fileStream: InputStream): String {
         return fileStream.use { stream ->
             val bufferedStream = stream.buffered()
             logger.executeWithExceptionLoggingAsync(
                 operation = {
-                    val fileType = detectFileType(bufferedStream)
+                    val fileType = detectFileTypeMagicNumbers(bufferedStream)
                     val fileName = generateFileName(fileType)
                     blobStorageRepository.uploadFileToBlobStorage(bufferedStream, fileName)
                 },
@@ -55,28 +53,28 @@ class BlobStorageService @Inject constructor(
         )
     }
 
-    private fun detectFileType(fileStream: InputStream): String {
-        val bufferedStream = fileStream.buffered()
-        bufferedStream.mark(Int.MAX_VALUE)
+    private fun detectFileTypeMagicNumbers(fileStream: InputStream): String {
+        val buffer = ByteArray(8)
+        fileStream.mark(8)
+        fileStream.read(buffer)
+        fileStream.reset()
 
-        val fileType = tika.detect(bufferedStream)
-        bufferedStream.reset()
-
-        return when (fileType) {
-            "image/jpeg" -> ".jpg"
-            "image/png" -> ".png"
-            "image/webp" -> ".webp"
-            "video/mp4" -> ".mp4"
-            "video/mpeg" -> ".mpeg"
-            "video/quicktime" -> ".mov"
-            "video/x-matroska" -> ".mkv"
-            "application/pdf" -> ".pdf"
+        return when {
+            buffer.startsWith(byteArrayOf(0xFF.toByte(), 0xD8.toByte(), 0xFF.toByte())) -> ".jpg"
+            buffer.startsWith(byteArrayOf(0x89.toByte(), 0x50.toByte(), 0x4E.toByte(), 0x47.toByte())) -> ".png"
+            buffer.startsWith("RIFF".toByteArray()) && buffer.slice(8..11).toByteArray().contentEquals("WEBP".toByteArray()) -> ".webp"
+            buffer.startsWith(byteArrayOf(0x00.toByte(), 0x00.toByte(), 0x00.toByte(), 0x18.toByte(), 0x66.toByte(), 0x74.toByte(), 0x79.toByte(), 0x70.toByte())) -> ".mp4"
+            buffer.startsWith(byteArrayOf(0x1A.toByte(), 0x45.toByte(), 0xDF.toByte(), 0xA3.toByte())) -> ".mkv"
+            buffer.startsWith("%PDF".toByteArray()) -> ".pdf"
             else -> throw APIException(
                 errorCode = ErrorCode.MEDIA_CREATION_ERROR,
-                message = "Unsupported file type: $fileType"
+                message = "Unsupported file type"
             )
         }
     }
+
+    private fun ByteArray.startsWith(prefix: ByteArray): Boolean =
+        this.take(prefix.size).toByteArray().contentEquals(prefix)
 
     private fun generateFileName(fileType: String): String {
         return "${UUID.randomUUID()}$fileType"
