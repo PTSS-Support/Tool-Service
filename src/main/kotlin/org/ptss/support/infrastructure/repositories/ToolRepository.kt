@@ -12,7 +12,6 @@ import org.ptss.support.domain.models.Tool
 import org.ptss.support.infrastructure.persistence.entities.CategoryEntity
 import org.ptss.support.infrastructure.persistence.entities.ToolEntity
 import org.ptss.support.infrastructure.util.CalculatePaginationDetails
-import java.time.Instant
 import java.util.*
 
 @ApplicationScoped
@@ -22,19 +21,19 @@ class ToolRepository @Inject constructor(
 
     @Transactional
     override suspend fun getAll(cursor: String?, pageSize: Int, sortOrder: String): PaginationResponse<Tool> {
-        val parsedCursor = cursor?.takeIf { it.isNotEmpty() }?.let { Instant.parse(it) }
-        val totalItems = count().toInt()
-        val sort = Sort.by("createdAt", if (sortOrder == "desc") Sort.Direction.Descending else Sort.Direction.Ascending)
+        val isDesc = sortOrder == "desc"
+        val parsedCursor = cursor?.takeIf { it.isNotEmpty() }?.let { UUID.fromString(it) }
+        val sort = Sort.by("id", if (isDesc) Sort.Direction.Descending else Sort.Direction.Ascending)
 
-        val query = when {
-            parsedCursor != null -> find("createdAt ${if (sortOrder == "desc") "<" else ">"} ?1", sort, parsedCursor)
-            else -> findAll(sort)
-        }
+        val tools = (parsedCursor?.let { find("id ${if (isDesc) "<" else ">"} ?1", sort, it) }
+            ?: findAll(sort)).page(0, pageSize + 1).list()
 
-        val tools = query.page(0, pageSize + 1).list()
-
-        return CalculatePaginationDetails.calculatePaginationDetails(tools, pageSize, totalItems) { it.createdAt.toString() }.let { (items, nextCursor, totalPages) ->
-            PaginationResponse(items.map { it.toDomain() }, nextCursor, items.size, totalItems, totalPages)
+        return CalculatePaginationDetails.calculatePaginationDetails(
+            tools,
+            pageSize,
+            count().toInt()
+        ) { it.id.toString() }.let { (items, next, pages) ->
+            PaginationResponse(items.map { it.toDomain() }, next, items.size, count().toInt(), pages)
         }
     }
 

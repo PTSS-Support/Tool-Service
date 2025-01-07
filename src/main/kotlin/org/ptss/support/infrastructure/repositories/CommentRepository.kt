@@ -22,22 +22,25 @@ class CommentRepository @Inject constructor(
 
     @Transactional
     override suspend fun getAll(toolId: String, cursor: String?, pageSize: Int, sortOrder: String): PaginationResponse<Comment> {
+        val isDesc = sortOrder == "desc"
+        val sort = Sort.by("id", if (isDesc) Sort.Direction.Descending else Sort.Direction.Ascending)
+        val parsedCursor = cursor?.takeIf { it.isNotEmpty() }?.let { UUID.fromString(it) }
         val toolIdUUID = UUID.fromString(toolId)
-        val parsedCursor = cursor?.let(Instant::parse)
-        val totalItems = count("tool.id", toolIdUUID).toInt()
 
-        val sort = Sort.by("createdAt", if (sortOrder == "desc") Sort.Direction.Descending else Sort.Direction.Ascending)
+        val query = when (parsedCursor) {
+            null -> find("tool.id = ?1", sort, toolIdUUID)
+            else -> find("tool.id = ?1 and id ${if (isDesc) "<" else ">"} ?2", sort, toolIdUUID, parsedCursor)
+        }
 
-        val query = find("tool.id = ?1", sort, toolIdUUID)
+        val comments = query.page(0, pageSize + 1).list()
 
-        val comments = query.list()
-            .filter { parsedCursor == null || (sortOrder == "desc" && it.createdAt < parsedCursor) || (sortOrder != "desc" && it.createdAt > parsedCursor) }
-            .take(pageSize + 1)
-
-        return CalculatePaginationDetails.calculatePaginationDetails(comments, pageSize, totalItems) { it.createdAt.toString() }
-            .let { (items, nextCursor, totalPages) ->
-                PaginationResponse(items.map { it.toDomain() }, nextCursor, items.size, totalItems, totalPages)
-            }
+        return CalculatePaginationDetails.calculatePaginationDetails(
+            comments,
+            pageSize,
+            count("tool.id", toolIdUUID).toInt()
+        ) { it.id.toString() }.let { (items, next, pages) ->
+            PaginationResponse(items.map { it.toDomain() }, next, items.size, items.size, pages)
+        }
     }
 
     @Transactional
