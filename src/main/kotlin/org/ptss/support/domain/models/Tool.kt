@@ -1,7 +1,7 @@
 package org.ptss.support.domain.models
 
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 data class Tool(
     val id: String = UUID.randomUUID().toString(),
@@ -11,5 +11,5 @@ data class Tool(
     val category: List<String>,
     val createdBy: String,
     val createdAt: Instant,
-    val media: List<MediaInfo> = emptyList(),
+    val media: MediaInfo? = null
 )

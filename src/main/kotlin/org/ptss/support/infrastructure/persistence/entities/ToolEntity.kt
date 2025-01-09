@@ -6,6 +6,8 @@ import jakarta.persistence.Id
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Column
 import jakarta.persistence.ManyToMany
+import jakarta.persistence.OneToOne
+import jakarta.persistence.CascadeType
 import org.ptss.support.domain.models.Tool
 import java.time.Instant
 import java.util.UUID
@@ -37,6 +39,10 @@ class ToolEntity {
     @Column(name = "created_at", nullable = false)
     var createdAt: Instant = Instant.now()
 
+    @OneToOne(mappedBy = "tool", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var mediaItem: MediaInfoEntity? = null
+
+    // No-arg constructor for JPA
     constructor()
 
     constructor(
@@ -65,7 +71,7 @@ class ToolEntity {
         category = categories.map { it.category },
         createdBy = createdBy,
         createdAt = createdAt,
-        media = emptyList()
+        media = mediaItem?.toDomain() // Nullable mapping
     )
 
     companion object {

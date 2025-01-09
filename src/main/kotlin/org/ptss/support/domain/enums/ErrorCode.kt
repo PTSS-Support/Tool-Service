@@ -32,6 +32,9 @@ enum class ErrorCode(
     // Comment errors
     COMMENT_NOT_FOUND("COMMENT_NOT_FOUND", 404, "The requested comment was not found"),
 
+    // Media error
+    MEDIA_NOT_FOUND("MEDIA_NOT_FOUND", 404, "The requested media file was not found"),
+
     INTERNAL_ERROR("INTERNAL_ERROR", 500, "An unexpected system error occurred"),
     RATE_LIMIT_EXCEEDED("RATE_LIMIT_EXCEEDED", 429, "Too many requests"),
     SERVICE_UNAVAILABLE("SERVICE_UNAVAILABLE", 503, "Service temporarily unavailable"),
@@ -48,10 +51,15 @@ enum class ErrorCode(
     TOOL_DELETION_ERROR("TOOL_DELETION_ERROR", 400, "Failed to delete tool"),
 
     // Comment errors
-    COMMENT_UPDATE_ERROR("COMMENT_UPDATE_ERROR", 400, "Dailed to update comment"),
+    COMMENT_UPDATE_ERROR("COMMENT_UPDATE_ERROR", 400, "Failed to update comment"),
     COMMENT_VALIDATION_ERROR("COMMENT_VALIDATION_ERROR", 400, "Comment data validation failed"),
     COMMENT_CREATION_ERROR("COMMENT_CREATION_ERROR", 400, "Failed to create comment"),
     COMMENT_DELETION_ERROR("COMMENT_DELETION_ERROR", 400, "Failed to delete comment"),
+
+    //Media errors
+    MEDIA_CREATION_ERROR("MEDIA_CREATION_ERROR", 400, "Failed to upload media"),
+    MEDIA_DELETION_ERROR("MEDIA_DELETION_ERROR", 400, "Failed to delete media"),
+    FILE_SIZE_EXCEEDED("FILE_SIZE_EXCEEDED", 400, "File size exceeds the maximum allowed limit"),
 
     // Category errors
     CATEGORY_UPDATE_ERROR("CATEGORY_UPDATE_ERROR", 400, "Failed to update category"),

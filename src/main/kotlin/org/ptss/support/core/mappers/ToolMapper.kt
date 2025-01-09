@@ -21,13 +21,7 @@ object ToolMapper {
         description = tool.description,
         createdBy = tool.createdBy,
         createdAt = tool.createdAt,
-        media = tool.media.map { mediaInfo ->
-            MediaInfoResponse(
-                id = mediaInfo.id,
-                url = mediaInfo.url,
-                type = mediaInfo.type
-            )
-        }
+        media = tool.media?.let { MediaInfoMapper.toResponse(it) }
     )
 
     fun toCommand(request: CreateToolRequest) = CreateToolCommand(
