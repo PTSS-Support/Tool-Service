@@ -59,6 +59,7 @@ enum class ErrorCode(
     //Media errors
     MEDIA_CREATION_ERROR("MEDIA_CREATION_ERROR", 400, "Failed to upload media"),
     MEDIA_DELETION_ERROR("MEDIA_DELETION_ERROR", 400, "Failed to delete media"),
+    FILE_SIZE_EXCEEDED("FILE_SIZE_EXCEEDED", 400, "File size exceeds the maximum allowed limit"),
 
     // Category errors
     CATEGORY_UPDATE_ERROR("CATEGORY_UPDATE_ERROR", 400, "Failed to update category"),

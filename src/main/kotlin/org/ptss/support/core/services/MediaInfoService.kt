@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped
 import org.ptss.support.common.exceptions.APIException
 import org.ptss.support.domain.commands.media.CreateMediaInfoCommand
 import org.ptss.support.domain.commands.media.DeleteMediaInfoCommand
+import org.ptss.support.domain.constants.FileConstants
 import org.ptss.support.domain.enums.ErrorCode
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
 import org.ptss.support.domain.models.MediaInfo
@@ -16,8 +17,6 @@ class MediaInfoService(
     private val deleteMediaInfoHandler : ICommandHandler<DeleteMediaInfoCommand, Unit>
 ) {
     private val logger = LoggerFactory.getLogger(MediaInfoService::class.java)
-
-    private val maxFileSize = 10L * 1024 * 1024 // 10MB
 
     suspend fun createMediaInfoAsync(command: CreateMediaInfoCommand): MediaInfo {
         validateMediaCommand(command)
@@ -52,12 +51,13 @@ class MediaInfoService(
     }
 
     private suspend fun validateMediaCommand(command: CreateMediaInfoCommand) {
-        requireNotNull(command.fileData) { "File data cannot be null" }
+        val fileSize = command.fileData?.available()?.toLong() ?: 0
 
-        // Validate file size
-        val fileSize = command.fileData.available().toLong()
-        require(fileSize <= maxFileSize) {
-            "File size exceeds maximum allowed size of ${maxFileSize / (1024 * 1024)}MB"
+        if (fileSize > FileConstants.MAX_FILE_SIZE) {
+            throw APIException(
+                errorCode = ErrorCode.FILE_SIZE_EXCEEDED,
+                message = "File size exceeds the maximum allowed size of ${FileConstants.MAX_FILE_SIZE / (1024 * 1024)}MB"
+            )
         }
     }
 }
