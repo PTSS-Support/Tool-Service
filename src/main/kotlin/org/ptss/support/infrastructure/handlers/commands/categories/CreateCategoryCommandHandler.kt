@@ -8,23 +8,27 @@ import org.ptss.support.domain.interfaces.commands.ICommandHandler
 import org.ptss.support.domain.models.Category
 import org.ptss.support.infrastructure.repositories.CategoryRepository
 import org.ptss.support.infrastructure.util.executeWithExceptionLoggingAsync
+import org.ptss.support.security.context.AuthenticatedUserContext
 import org.slf4j.LoggerFactory
 import java.time.Instant
-import java.util.UUID
 
 @ApplicationScoped
 class CreateCategoryCommandHandler(
-    private val categoryRepository: CategoryRepository
+    private val categoryRepository: CategoryRepository,
+    private val authenticatedUserContext: AuthenticatedUserContext
 ) : ICommandHandler<CreateCategoryCommand, Category> {
     private val logger = LoggerFactory.getLogger(CreateCategoryCommandHandler::class.java)
 
     override suspend fun handleAsync(command: CreateCategoryCommand): Category {
-        return withContext(Dispatchers.IO) {
+        val contextElement = authenticatedUserContext.asCoroutineContext()
+
+        return withContext(Dispatchers.IO + contextElement) {
             logger.executeWithExceptionLoggingAsync(
                 operation = {
+                    val userContext = authenticatedUserContext.getCurrentUser()
                     val category = Category(
                         category = command.category,
-                        groupId = UUID.randomUUID().toString(),
+                        groupId = userContext.groupId.toString(),
                         createdAt = Instant.now(),
                         tools = emptyList()
                     )

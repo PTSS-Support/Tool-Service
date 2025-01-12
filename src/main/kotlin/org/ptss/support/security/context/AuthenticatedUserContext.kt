@@ -3,6 +3,8 @@ package org.ptss.support.security.context
 import io.quarkus.security.UnauthorizedException
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
+import kotlinx.coroutines.ThreadContextElement
+import kotlinx.coroutines.asContextElement
 
 @ApplicationScoped
 class AuthenticatedUserContext @Inject constructor() {
@@ -17,5 +19,10 @@ class AuthenticatedUserContext @Inject constructor() {
 
     fun clearCurrentUser() {
         userContext.remove()
+    }
+
+    // Add this method to create a coroutine context element
+    fun asCoroutineContext(): ThreadContextElement<UserContext> {
+        return userContext.asContextElement(userContext.get())
     }
 }

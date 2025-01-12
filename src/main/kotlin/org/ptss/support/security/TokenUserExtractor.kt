@@ -82,7 +82,8 @@ class TokenUserExtractor @Inject constructor(
             userId = userId,
             groupId = extractGroupId(jwt),
             roles = extractRole(jwt),
-            hasPin = extractHasPin(jwt)
+            hasPin = extractHasPin(jwt),
+            firstName = jwt.getClaim("first_name") ?: throw UnauthorizedException("Missing first_name claim")
         )
     }
 

@@ -8,9 +8,7 @@ import org.ptss.support.domain.models.Comment
 object CommentMapper {
     fun toCommand(toolId: String, request: CreateCommentRequest) = CreateCommentCommand(
         toolId = toolId,
-        content = request.content,
-        senderId = "Authenticated User ID", // Replace with actual user ID from session
-        senderName = "Authenticated User Name" // Replace with actual user name from session
+        content = request.content
     )
 
     fun toResponse(comment: Comment) = CommentResponse(
