@@ -8,12 +8,13 @@ import org.ptss.support.api.dtos.responses.tools.ToolResponse
 import org.ptss.support.core.mappers.PaginationMapper
 import org.ptss.support.core.mappers.ToolMapper
 import org.ptss.support.core.services.ToolService
+import org.ptss.support.domain.enums.SortOrder
 
 @ApplicationScoped
 class ToolFacade @Inject constructor(
     private val toolService: ToolService
 ) {
-    suspend fun getAllTools(cursor: String?, pageSize: Int, sortOrder: String): PaginationResponse<ToolResponse> {
+    suspend fun getAllTools(cursor: String?, pageSize: Int, sortOrder: SortOrder): PaginationResponse<ToolResponse> {
         val result = toolService.getAllToolsAsync(cursor, pageSize, sortOrder)
         return PaginationMapper.mapPaginationResponse(result, ToolMapper::toResponse)
     }

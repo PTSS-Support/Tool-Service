@@ -7,6 +7,7 @@ import org.ptss.support.core.util.ValidatePagination.validatePagination
 import org.ptss.support.domain.commands.tools.CreateToolCommand
 import org.ptss.support.domain.commands.tools.DeleteToolCommand
 import org.ptss.support.domain.enums.ErrorCode
+import org.ptss.support.domain.enums.SortOrder
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
 import org.ptss.support.domain.interfaces.queries.IQueryHandler
 import org.ptss.support.domain.models.Tool
@@ -47,8 +48,8 @@ class ToolService(
         )
     }
 
-    suspend fun getAllToolsAsync(cursor: String?, pageSize: Int, sortOrder: String): PaginationResponse<Tool> {
-        validatePagination(pageSize, sortOrder)
+    suspend fun getAllToolsAsync(cursor: String?, pageSize: Int, sortOrder: SortOrder): PaginationResponse<Tool> {
+        validatePagination(pageSize)
 
         return logger.executeWithExceptionLoggingAsync(
             operation = {

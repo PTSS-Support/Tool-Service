@@ -9,12 +9,13 @@ import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
 import org.ptss.support.core.mappers.CommentMapper
 import org.ptss.support.core.mappers.PaginationMapper
 import org.ptss.support.core.services.CommentService
+import org.ptss.support.domain.enums.SortOrder
 
 @ApplicationScoped
 class CommentFacade @Inject constructor(
     private val commentService: CommentService
 ) {
-    suspend fun getAllComments(toolId: String, cursor: String?, pageSize: Int, sortOrder: String
+    suspend fun getAllComments(toolId: String, cursor: String?, pageSize: Int, sortOrder: SortOrder
     ): PaginationResponse<CommentResponse> {
         val result = commentService.getAllCommentsAsync(toolId, cursor, pageSize, sortOrder)
         return PaginationMapper.mapPaginationResponse(result, CommentMapper::toResponse)

@@ -14,6 +14,7 @@ import org.ptss.support.api.dtos.requests.comments.UpdateCommentRequest
 import org.ptss.support.api.dtos.responses.comments.CommentResponse
 import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
 import org.ptss.support.common.exceptions.ServiceError
+import org.ptss.support.domain.enums.SortOrder
 
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

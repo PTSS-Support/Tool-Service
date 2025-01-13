@@ -7,6 +7,9 @@ import jakarta.inject.Inject
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
+import org.ptss.support.common.extensions.toComparisonOperator
+import org.ptss.support.common.extensions.toSortDirection
+import org.ptss.support.domain.enums.SortOrder
 import org.ptss.support.domain.interfaces.repositories.ICommentRepository
 import org.ptss.support.domain.models.Comment
 import org.ptss.support.infrastructure.persistence.entities.CommentEntity
@@ -21,15 +24,14 @@ class CommentRepository @Inject constructor(
 ) : ICommentRepository, PanacheRepository<CommentEntity> {
 
     @Transactional
-    override suspend fun getAll(toolId: String, cursor: String?, pageSize: Int, sortOrder: String): PaginationResponse<Comment> {
-        val isDesc = sortOrder == "desc"
-        val sort = Sort.by("id", if (isDesc) Sort.Direction.Descending else Sort.Direction.Ascending)
+    override suspend fun getAll(toolId: String, cursor: String?, pageSize: Int, sortOrder: SortOrder): PaginationResponse<Comment> {
+        val sort = Sort.by("id", sortOrder.toSortDirection())
         val parsedCursor = cursor?.takeIf { it.isNotEmpty() }?.let { UUID.fromString(it) }
         val toolIdUUID = UUID.fromString(toolId)
 
         val query = when (parsedCursor) {
             null -> find("tool.id = ?1", sort, toolIdUUID)
-            else -> find("tool.id = ?1 and id ${if (isDesc) "<" else ">"} ?2", sort, toolIdUUID, parsedCursor)
+            else -> find("tool.id = ?1 and id ${sortOrder.toComparisonOperator()} ?2", sort, toolIdUUID, parsedCursor)
         }
 
         val comments = query.page(0, pageSize + 1).list()
