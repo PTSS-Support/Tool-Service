@@ -5,11 +5,11 @@ import java.util.*
 
 data class Tool(
     val id: String = UUID.randomUUID().toString(),
-    val userId: String = UUID.randomUUID().toString(), // Will later be changed to the actual users id
+    val userId: String,
     val name: String,
     val description: String,
     val category: List<String>,
-    val createdBy: String,
+    val createdBy: String?,
     val createdAt: Instant,
     val media: MediaInfo? = null
 )

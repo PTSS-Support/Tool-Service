@@ -10,14 +10,14 @@ object ToolMapper {
     fun toSummaryResponse(tool: Tool) = ToolSummaryResponse(
         id = tool.id,
         name = tool.name,
-        createdBy = tool.createdBy
+        createdBy = tool.createdBy ?: ""
     )
 
     fun toResponse(tool: Tool) = ToolResponse(
         id = tool.id,
         name = tool.name,
         description = tool.description,
-        createdBy = tool.createdBy,
+        createdBy = tool.createdBy ?: "",
         createdAt = tool.createdAt,
         media = tool.media?.let { MediaInfoMapper.toResponse(it) }
     )

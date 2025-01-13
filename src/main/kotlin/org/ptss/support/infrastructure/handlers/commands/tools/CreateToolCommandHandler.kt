@@ -36,7 +36,7 @@ class CreateToolCommandHandler(
                         name = command.name,
                         description = command.description,
                         category = command.category,
-                        createdBy = userContext.firstName,
+                        createdBy = userContext.firstName.takeIf { it.isNotBlank() },
                         createdAt = Instant.now()
                     )
 

@@ -1,16 +1,9 @@
 package org.ptss.support.infrastructure.persistence.entities
 
-import jakarta.persistence.Entity
-import jakarta.persistence.Table
-import jakarta.persistence.Id
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.Column
-import jakarta.persistence.ManyToMany
-import jakarta.persistence.OneToOne
-import jakarta.persistence.CascadeType
+import jakarta.persistence.*
 import org.ptss.support.domain.models.Tool
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "tools")
@@ -34,7 +27,7 @@ class ToolEntity {
     var categories: List<CategoryEntity> = emptyList()
 
     @Column(name = "created_by", nullable = false)
-    var createdBy: String = ""
+    var createdBy: String? = null
 
     @Column(name = "created_at", nullable = false)
     var createdAt: Instant = Instant.now()
@@ -51,7 +44,7 @@ class ToolEntity {
         name: String,
         description: String,
         categories: List<CategoryEntity>,
-        createdBy: String,
+        createdBy: String?,
         createdAt: Instant
     ) {
         this.id = id
