@@ -7,6 +7,9 @@ import jakarta.inject.Inject
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
+import org.ptss.support.common.extensions.toComparisonOperator
+import org.ptss.support.common.extensions.toSortDirection
+import org.ptss.support.domain.enums.SortOrder
 import org.ptss.support.domain.interfaces.repositories.IToolRepository
 import org.ptss.support.domain.models.Tool
 import org.ptss.support.infrastructure.persistence.entities.CategoryEntity
@@ -20,12 +23,11 @@ class ToolRepository @Inject constructor(
 ) : IToolRepository, PanacheRepository<ToolEntity> {
 
     @Transactional
-    override suspend fun getAll(cursor: String?, pageSize: Int, sortOrder: String): PaginationResponse<Tool> {
-        val isDesc = sortOrder == "desc"
+    override suspend fun getAll(cursor: String?, pageSize: Int, sortOrder: SortOrder): PaginationResponse<Tool> {
+        val sort = Sort.by("id", sortOrder.toSortDirection())
         val parsedCursor = cursor?.takeIf { it.isNotEmpty() }?.let { UUID.fromString(it) }
-        val sort = Sort.by("id", if (isDesc) Sort.Direction.Descending else Sort.Direction.Ascending)
 
-        val tools = (parsedCursor?.let { find("id ${if (isDesc) "<" else ">"} ?1", sort, it) }
+        val tools = (parsedCursor?.let { find("id ${sortOrder.toComparisonOperator()} ?1", sort, it) }
             ?: findAll(sort)).page(0, pageSize + 1).list()
 
         return CalculatePaginationDetails.calculatePaginationDetails(

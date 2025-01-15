@@ -9,6 +9,7 @@ import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
 import org.ptss.support.api.dtos.responses.tools.ToolResponse
 import org.ptss.support.core.facades.ToolFacade
 import org.ptss.support.domain.enums.Role
+import org.ptss.support.domain.enums.SortOrder
 import org.ptss.support.domain.interfaces.controllers.IToolController
 import org.ptss.support.security.Authentication
 
@@ -17,10 +18,10 @@ import org.ptss.support.security.Authentication
 @Authentication(roles = [Role.PATIENT, Role.FAMILY_MEMBER, Role.HCP])
 class ToolController(
     private val toolFacade: ToolFacade
-    ) : IToolController {
+) : IToolController {
 
     override suspend fun getAllTools(cursor: String?, pageSize: Int, sortOrder: String): PaginationResponse<ToolResponse> =
-        toolFacade.getAllTools(cursor, pageSize, sortOrder)
+        toolFacade.getAllTools(cursor, pageSize, SortOrder.fromString(sortOrder))
 
     override suspend fun getToolById(@PathParam("id") id: String): ToolResponse? =
         toolFacade.getToolById(id)
