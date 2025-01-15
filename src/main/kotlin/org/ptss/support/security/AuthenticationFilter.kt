@@ -81,7 +81,7 @@ class AuthenticationFilter @Inject constructor(
         Log.debug("Token present: ${token != null}")
 
         if (token.isNullOrBlank()) {
-            Log.error("Token not found in cookie")
+            Log.warn("Token not found in cookie")
             throw UnauthorizedException("Access token not found")
         }
 
