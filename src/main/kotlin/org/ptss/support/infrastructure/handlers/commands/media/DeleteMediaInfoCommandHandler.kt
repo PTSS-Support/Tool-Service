@@ -11,6 +11,7 @@ import org.ptss.support.domain.interfaces.commands.ICommandHandler
 import org.ptss.support.infrastructure.repositories.MediaInfoRepository
 import org.ptss.support.infrastructure.util.executeWithExceptionLoggingAsync
 import org.slf4j.LoggerFactory
+import java.net.URI
 
 @ApplicationScoped
 class DeleteMediaInfoCommandHandler(
@@ -24,16 +25,14 @@ class DeleteMediaInfoCommandHandler(
         withContext(Dispatchers.IO) {
             logger.executeWithExceptionLoggingAsync(
                 operation = {
-                    // Delete media info and return the associated URL
                     val mediaUrl = mediaInfoRepository.delete(command.toolId, command.id)
                         ?: throw APIException(
                             errorCode = ErrorCode.MEDIA_NOT_FOUND,
                             message = "Media with ID ${command.id} not found for tool ${command.toolId}"
                         )
 
-                    // Extract blob name from the URL and delete the blob
                     val blobName = extractBlobName(mediaUrl.url)
-                    blobStorageService.deleteFileFromBlobAsync(blobName)
+                    blobStorageService.deleteFileAsync(blobName)
                 },
                 logMessage = "Error deleting media ${command.id} for tool ${command.toolId}"
             )
@@ -41,7 +40,7 @@ class DeleteMediaInfoCommandHandler(
     }
 
     private fun extractBlobName(url: String): String {
-        // Logic to extract blob name from URL (implementation depends on Azure URL format)
-        return url.substringAfterLast("/")
+        val uri = URI(url)
+        return uri.path.substringAfterLast("/")
     }
 }
