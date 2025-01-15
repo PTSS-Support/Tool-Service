@@ -2,11 +2,14 @@ package org.ptss.support.core.services
 
 import jakarta.enterprise.context.ApplicationScoped
 import org.ptss.support.api.dtos.requests.comments.UpdateCommentRequest
+import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
 import org.ptss.support.common.exceptions.APIException
+import org.ptss.support.core.util.ValidatePagination.validatePagination
 import org.ptss.support.domain.commands.comments.CreateCommentCommand
 import org.ptss.support.domain.commands.comments.DeleteCommentCommand
 import org.ptss.support.domain.commands.comments.UpdateCommentCommand
 import org.ptss.support.domain.enums.ErrorCode
+import org.ptss.support.domain.enums.SortOrder
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
 import org.ptss.support.domain.models.Comment
 import org.ptss.support.domain.queries.comments.GetAllCommentsQuery
@@ -23,9 +26,13 @@ class CommentService(
 ) {
     private val logger = LoggerFactory.getLogger(ToolService::class.java)
 
-    suspend fun getAllCommentsAsync(toolId: String): List<Comment> {
+    suspend fun getAllCommentsAsync(toolId: String, cursor: String?, pageSize: Int, sortOrder: SortOrder): PaginationResponse<Comment> {
+        validatePagination(pageSize)
+
         return logger.executeWithExceptionLoggingAsync(
-            operation = { getAllCommentsHandler.handleAsync(GetAllCommentsQuery(toolId)) },
+            operation = {
+                getAllCommentsHandler.handleAsync(GetAllCommentsQuery(toolId, cursor, pageSize, sortOrder))
+            },
             logMessage = "Error retrieving comments for tool $toolId",
             exceptionHandling = { ex ->
                 APIException(

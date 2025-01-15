@@ -1,15 +1,22 @@
 package org.ptss.support.infrastructure.repositories
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheRepository
+import io.quarkus.panache.common.Sort
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
+import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
+import org.ptss.support.common.extensions.toComparisonOperator
+import org.ptss.support.common.extensions.toSortDirection
+import org.ptss.support.domain.enums.SortOrder
 import org.ptss.support.domain.interfaces.repositories.ICommentRepository
 import org.ptss.support.domain.models.Comment
 import org.ptss.support.infrastructure.persistence.entities.CommentEntity
 import org.ptss.support.infrastructure.persistence.entities.ToolEntity
-import java.util.UUID
+import org.ptss.support.infrastructure.util.CalculatePaginationDetails
+import java.time.Instant
+import java.util.*
 
 @ApplicationScoped
 class CommentRepository @Inject constructor(
@@ -17,29 +24,33 @@ class CommentRepository @Inject constructor(
 ) : ICommentRepository, PanacheRepository<CommentEntity> {
 
     @Transactional
-    override suspend fun getAll(toolId: String): List<Comment> {
+    override suspend fun getAll(toolId: String, cursor: String?, pageSize: Int, sortOrder: SortOrder): PaginationResponse<Comment> {
+        val sort = Sort.by("id", sortOrder.toSortDirection())
+        val parsedCursor = cursor?.takeIf { it.isNotEmpty() }?.let { UUID.fromString(it) }
         val toolIdUUID = UUID.fromString(toolId)
-        return entityManager.createQuery(
-            """
-            SELECT c 
-            FROM CommentEntity c 
-            JOIN c.tool t 
-            WHERE t.id = :toolId
-            """, CommentEntity::class.java
-        )
-            .setParameter("toolId", toolIdUUID)
-            .resultList
-            .map { it.toDomain() }
+
+        val query = when (parsedCursor) {
+            null -> find("tool.id = ?1", sort, toolIdUUID)
+            else -> find("tool.id = ?1 and id ${sortOrder.toComparisonOperator()} ?2", sort, toolIdUUID, parsedCursor)
+        }
+
+        val comments = query.page(0, pageSize + 1).list()
+
+        return CalculatePaginationDetails.calculatePaginationDetails(
+            comments,
+            pageSize,
+            count("tool.id", toolIdUUID).toInt()
+        ) { it.id.toString() }.let { (items, next, pages) ->
+            PaginationResponse(items.map { it.toDomain() }, next, items.size, items.size, pages)
+        }
     }
 
     @Transactional
     override suspend fun create(comment: Comment): String {
         val toolEntity = entityManager.find(ToolEntity::class.java, UUID.fromString(comment.toolId))
-            ?: throw IllegalArgumentException("Tool with ID ${comment.toolId} does not exist")
 
         val entity = CommentEntity.fromDomain(comment, toolEntity)
 
-        // Ensure the ID is null before persisting
         entity.id = null
 
         entityManager.persist(entity)
@@ -52,8 +63,9 @@ class CommentRepository @Inject constructor(
         val entity = findCommentByToolAndId(toolId, commentId) ?: return null
 
         entity.content = content
-        entity.lastEditedAt = java.time.Instant.now()
-        entityManager.merge(entity)
+        entity.lastEditedAt = Instant.now()
+
+        persist(entity)
 
         return entity.toDomain()
     }
@@ -66,22 +78,10 @@ class CommentRepository @Inject constructor(
         return entity.toDomain()
     }
 
-    // Helper function to find a comment by toolId and commentId
     private fun findCommentByToolAndId(toolId: String, commentId: String): CommentEntity? {
         val toolIdUUID = UUID.fromString(toolId)
         val commentIdUUID = UUID.fromString(commentId)
 
-        return entityManager.createQuery(
-            """
-            SELECT c 
-            FROM CommentEntity c 
-            JOIN c.tool t 
-            WHERE t.id = :toolId AND c.id = :commentId
-            """, CommentEntity::class.java
-        )
-            .setParameter("toolId", toolIdUUID)
-            .setParameter("commentId", commentIdUUID)
-            .resultList
-            .firstOrNull()
+        return find("tool.id = ?1 and id = ?2", toolIdUUID, commentIdUUID).firstResult()
     }
 }

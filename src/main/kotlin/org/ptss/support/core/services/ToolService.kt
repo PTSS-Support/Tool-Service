@@ -1,10 +1,13 @@
 package org.ptss.support.core.services
 
 import jakarta.enterprise.context.ApplicationScoped
+import org.ptss.support.api.dtos.responses.pagination.PaginationResponse
 import org.ptss.support.common.exceptions.APIException
+import org.ptss.support.core.util.ValidatePagination.validatePagination
 import org.ptss.support.domain.commands.tools.CreateToolCommand
 import org.ptss.support.domain.commands.tools.DeleteToolCommand
 import org.ptss.support.domain.enums.ErrorCode
+import org.ptss.support.domain.enums.SortOrder
 import org.ptss.support.domain.interfaces.commands.ICommandHandler
 import org.ptss.support.domain.interfaces.queries.IQueryHandler
 import org.ptss.support.domain.models.Tool
@@ -45,10 +48,14 @@ class ToolService(
         )
     }
 
-    suspend fun getAllToolsAsync(): List<Tool> {
+    suspend fun getAllToolsAsync(cursor: String?, pageSize: Int, sortOrder: SortOrder): PaginationResponse<Tool> {
+        validatePagination(pageSize)
+
         return logger.executeWithExceptionLoggingAsync(
-            operation = { getAllToolsHandler.handleAsync(GetAllToolsQuery()) },
-            logMessage = "Error retrieving all tools",
+            operation = {
+                getAllToolsHandler.handleAsync(GetAllToolsQuery(cursor, pageSize, sortOrder))
+            },
+            logMessage = "Error retrieving tools",
             exceptionHandling = { ex ->
                 APIException(
                     errorCode = ErrorCode.TOOL_CREATION_ERROR,

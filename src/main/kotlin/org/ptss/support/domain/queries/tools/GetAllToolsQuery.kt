@@ -1,3 +1,9 @@
 package org.ptss.support.domain.queries.tools
 
-class GetAllToolsQuery()
+import org.ptss.support.domain.enums.SortOrder
+
+data class GetAllToolsQuery(
+    val cursor: String?,
+    val pageSize: Int,
+    val sortOrder: SortOrder
+)
