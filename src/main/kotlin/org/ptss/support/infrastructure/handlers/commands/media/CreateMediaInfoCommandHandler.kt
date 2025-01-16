@@ -1,7 +1,6 @@
 package org.ptss.support.infrastructure.handlers.commands.media
 
 import jakarta.enterprise.context.ApplicationScoped
-import jakarta.ws.rs.BadRequestException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.ptss.support.common.exceptions.APIException
@@ -26,10 +25,6 @@ class CreateMediaInfoCommandHandler(
         return withContext(Dispatchers.IO) {
             logger.executeWithExceptionLoggingAsync(
                 operation = {
-                    if (command.fileData == null) {
-                        throw BadRequestException("File data is required")
-                    }
-
                     if (mediaInfoRepository.hasExistingMedia(command.toolId)) {
                         throw APIException(
                             errorCode = ErrorCode.MEDIA_CREATION_ERROR,
@@ -37,12 +32,20 @@ class CreateMediaInfoCommandHandler(
                         )
                     }
 
-                    val url = blobStorageService.uploadFileToBlobAsync(command.fileData)
+                    val blobUrl = blobStorageService.uploadFileAsync(
+                        command.fileData ?: throw APIException(
+                            errorCode = ErrorCode.MEDIA_NOT_FOUND,
+                            message = "File data is required"
+                        )
+                    )
+
+                    val publicUrl = blobStorageService.getPublicBlobUrl(blobUrl.substringAfterLast("/"))
+
                     val mediaInfo = MediaInfo(
                         id = UUID.randomUUID().toString(),
                         toolId = command.toolId,
-                        url = url,
-                        href = command.href ?: url
+                        url = publicUrl,
+                        href = command.href ?: publicUrl
                     )
 
                     mediaInfoRepository.create(mediaInfo)
