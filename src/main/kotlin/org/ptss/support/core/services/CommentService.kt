@@ -101,8 +101,6 @@ class CommentService(
             command.toolId.isBlank() -> validationErrors.add("Tool ID cannot be empty")
             command.content.isBlank() -> validationErrors.add("Comment content cannot be empty")
             command.content.length > 1000 -> validationErrors.add("Comment content cannot exceed 1000 characters")
-            command.senderId.isBlank() -> validationErrors.add("Sender ID cannot be empty")
-            command.senderName.isBlank() -> validationErrors.add("Sender name cannot be empty")
         }
 
         if (validationErrors.isNotEmpty()) {
