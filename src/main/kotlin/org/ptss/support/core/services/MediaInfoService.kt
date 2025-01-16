@@ -63,7 +63,7 @@ class MediaInfoService(
         }
     }
 
-    suspend fun detectFileTypeAndContentType(fileStream: InputStream): Pair<String, String> {
+    suspend fun detectFileAndContentType(fileStream: InputStream): Pair<String, String> {
         val buffer = ByteArray(8)
         fileStream.mark(8)
         fileStream.read(buffer)
@@ -85,10 +85,8 @@ class MediaInfoService(
         return fileType
     }
 
-
     private fun ByteArray.startsWith(prefix: ByteArray): Boolean =
         this.take(prefix.size).toByteArray().contentEquals(prefix)
-
 
     suspend fun generateFileName(fileType: String): String {
         return "${UUID.randomUUID()}$fileType"

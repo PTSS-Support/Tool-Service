@@ -23,7 +23,7 @@ class BlobStorageService @Inject constructor(
             val bufferedStream = stream.buffered()
             logger.executeWithExceptionLoggingAsync(
                 operation = {
-                    val (fileType, contentType) = mediaInfoService.detectFileTypeAndContentType(bufferedStream)
+                    val (fileType, contentType) = mediaInfoService.detectFileAndContentType(bufferedStream)
                     val fileName = mediaInfoService.generateFileName(fileType)
                     blobStorageRepository.uploadFile(fileName, bufferedStream, contentType)
                 },
